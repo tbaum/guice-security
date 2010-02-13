@@ -7,6 +7,8 @@ package de.atns.common.security.client;
 public interface SecurityUser {
 // -------------------------- OTHER METHODS --------------------------
 
+    String getLogin();
+
     boolean hasAccessTo(Secured secured);
 }
  

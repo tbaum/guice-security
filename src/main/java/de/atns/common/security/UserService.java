@@ -10,4 +10,6 @@ public interface UserService {
 // -------------------------- OTHER METHODS --------------------------
 
     SecurityUser findUser(String login, String pass);
+
+    SecurityUser refreshUser(String login);
 }
