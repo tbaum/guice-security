@@ -20,7 +20,7 @@ import static java.util.UUID.randomUUID;
 
     private static final Log LOG = LogFactory.getLog(SecurityService.class);
 
-    private final TimeoutCache<UUID, SecurityUser> cache = new TimeoutCache<UUID, SecurityUser>(10000);
+    private final TimeoutCache<UUID, SecurityUser> cache = new TimeoutCache<UUID, SecurityUser>(30000);
 
     private final SecurityScope securityScope;
     private final UserService userService;
@@ -37,6 +37,7 @@ import static java.util.UUID.randomUUID;
     public SecurityUser authenticate(final UUID uuid) {
         final SecurityUser user = cache.get(uuid);
         if (user != null) {
+            cache.put(uuid, user);
             securityScope.put(SecurityUser.class, user);
             return user;
         }
@@ -47,8 +48,13 @@ import static java.util.UUID.randomUUID;
     public UUID login(final String login, final String password) {
         LOG.debug("login user=" + login);
         final SecurityUser user = userService.findUser(login, password);
+        if (user == null) {
+            return null;
+        }
+
         final UUID uuid = randomUUID();
         cache.put(uuid, user);
+        securityScope.put(SecurityUser.class, user);
         return uuid;
     }
 
@@ -57,4 +63,5 @@ import static java.util.UUID.randomUUID;
         cache.removeValue(user);
         return user;
     }
+
 }

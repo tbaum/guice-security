@@ -82,7 +82,7 @@ import static java.util.UUID.fromString;
     private void authFromHeader(final HttpServletRequest request) {
         final String uuid = request.getHeader(HEADER_NAME);
         if (uuid != null && !uuid.isEmpty()) {
-            LOG.debug("using header-token " + uuid);
+            LOG.debug("header  " + uuid);
             securityService.authenticate(fromString(uuid.replaceAll("[^0-9a-z-]", "")));
         }
     }
@@ -92,20 +92,29 @@ import static java.util.UUID.fromString;
         if (session != null) {
             final UUID uuid = (UUID) session.getAttribute(SESSION_UUID);
             if (uuid != null) {
-                LOG.debug("using session-var " + uuid);
+                LOG.debug("session " + uuid);
                 securityService.authenticate(uuid);
             }
         }
     }
 
-    public void login(final String login, final String password) {
-        authenticate(securityService.login(login, password));
+    public UUID login(final String login, final String password) {
+        final UUID token = securityService.login(login, password);
+        authenticate(token);
+        return token;
     }
 
     public void authenticate(final UUID token) {
-        final HttpSession session = currentRequest.get().getSession(true);
-        session.setAttribute(SESSION_UUID, token);
-        currentResponse.get().setHeader(HEADER_NAME, token.toString());
+        if (token == null) {
+            final HttpSession session = currentRequest.get().getSession(false);
+            if (session != null) {
+                session.removeAttribute(SESSION_UUID);
+            }
+        } else {
+            final HttpSession session = currentRequest.get().getSession(true);
+            session.setAttribute(SESSION_UUID, token);
+            currentResponse.get().setHeader(HEADER_NAME, token.toString());
+        }
     }
 
     public void logout() {
