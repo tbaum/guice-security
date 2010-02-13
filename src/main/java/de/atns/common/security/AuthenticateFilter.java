@@ -19,8 +19,8 @@ import java.io.IOException;
 public class AuthenticateFilter implements Filter {
 // ------------------------------ FIELDS ------------------------------
 
-    static final String SESSION_USER = "_SECURITY_USER";
-    static final String SESSION_UUID = "_SECURITY_UUID";
+    public static final String SESSION_USER = "_SECURITY_USER";
+    public static final String SESSION_UUID = "_SECURITY_UUID";
     private static final Log LOG = LogFactory.getLog(AuthenticateFilter.class);
     private final SecurityService securityService;
 
