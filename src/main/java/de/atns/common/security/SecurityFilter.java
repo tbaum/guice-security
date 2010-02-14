@@ -59,7 +59,7 @@ import static java.util.UUID.fromString;
                 currentResponse.set((HttpServletResponse) response);
 
                 authFromHeader((HttpServletRequest) request);
-                authFromSession((HttpServletRequest) request);
+                authFromSession();
             }
 
             try {
@@ -87,15 +87,20 @@ import static java.util.UUID.fromString;
         }
     }
 
-    private void authFromSession(final HttpServletRequest request) {
-        final HttpSession session = request.getSession(false);
-        if (session != null) {
-            final UUID uuid = (UUID) session.getAttribute(SESSION_UUID);
-            if (uuid != null) {
-                LOG.debug("session " + uuid);
-                securityService.authenticate(uuid);
-            }
+    private void authFromSession() {
+        final UUID uuid = getAuthToken();
+        if (uuid != null) {
+            LOG.debug("session " + uuid);
+            securityService.authenticate(uuid);
         }
+    }
+
+    public UUID getAuthToken() {
+        final HttpSession session = currentRequest.get().getSession(false);
+        if (session != null) {
+            return (UUID) session.getAttribute(SESSION_UUID);
+        }
+        return null;
     }
 
     public UUID login(final String login, final String password) {

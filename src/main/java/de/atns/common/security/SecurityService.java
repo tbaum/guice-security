@@ -20,7 +20,7 @@ import static java.util.UUID.randomUUID;
 
     private static final Log LOG = LogFactory.getLog(SecurityService.class);
 
-    private final TimeoutCache<UUID, SecurityUser> cache = new TimeoutCache<UUID, SecurityUser>(30000);
+    private final TimeoutCache<UUID, SecurityUser> cache = new TimeoutCache<UUID, SecurityUser>(1800000);
 
     private final SecurityScope securityScope;
     private final UserService userService;
