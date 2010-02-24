@@ -1,7 +1,5 @@
 package de.atns.common.security;
 
-import de.atns.common.security.client.Secured;
-
 import java.lang.reflect.Method;
 import java.util.List;
 

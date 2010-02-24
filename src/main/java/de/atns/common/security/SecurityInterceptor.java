@@ -1,7 +1,5 @@
 package de.atns.common.security;
 
-import de.atns.common.security.client.Secured;
-import de.atns.common.security.client.SecurityUser;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -34,7 +32,7 @@ public class SecurityInterceptor implements MethodInterceptor {
         }
 
         if (!user.hasAccessTo(secured)) {
-            throw new NotInRoleException(invocation.getMethod(),secured);
+            throw new NotInRoleException(invocation.getMethod(), secured);
         }
 
         return invocation.proceed();

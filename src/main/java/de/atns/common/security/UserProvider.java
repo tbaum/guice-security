@@ -2,7 +2,6 @@ package de.atns.common.security;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import de.atns.common.security.client.SecurityUser;
 
 public class UserProvider implements Provider<SecurityUser> {
 // ------------------------------ FIELDS ------------------------------

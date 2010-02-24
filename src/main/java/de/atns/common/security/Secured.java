@@ -1,4 +1,4 @@
-package de.atns.common.security.client;
+package de.atns.common.security;
 
 
 import java.lang.annotation.ElementType;
