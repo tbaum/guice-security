@@ -21,7 +21,7 @@ public class UserProvider implements Provider<SecurityUser> {
 
 // --------------------- Interface Provider ---------------------
 
-    public SecurityUser get() {
+    @Override public SecurityUser get() {
         final SecurityUser id = securityScope.get(SecurityUser.class);
         if (id == null) {
             return null;

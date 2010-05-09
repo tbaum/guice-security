@@ -36,7 +36,7 @@ import static java.util.UUID.randomUUID;
 
 // --------------------- Interface SecurityService ---------------------
 
-    public SecurityUser authenticate(final UUID uuid) {
+    @Override public SecurityUser authenticate(final UUID uuid) {
         final SecurityUser user = cache.get(uuid);
         if (user != null) {
             cache.put(uuid, user);
@@ -47,11 +47,11 @@ import static java.util.UUID.randomUUID;
         return null;
     }
 
-    public SecurityUser currentUser() {
+    @Override public SecurityUser currentUser() {
         return securityScope.get(SecurityUser.class);
     }
 
-    public UUID login(final String login, final String password) {
+    @Override public UUID login(final String login, final String password) {
         LOG.debug("login user=" + login);
         final SecurityUser user = userService.findUser(login, password);
         if (user == null) {
@@ -64,7 +64,7 @@ import static java.util.UUID.randomUUID;
         return uuid;
     }
 
-    public SecurityUser logout() {
+    @Override public SecurityUser logout() {
         SecurityUser user = currentUser();
         cache.removeValue(user);
         return user;

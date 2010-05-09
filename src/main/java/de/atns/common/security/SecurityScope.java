@@ -24,9 +24,9 @@ public class SecurityScope implements Scope {
 
 // --------------------- Interface Scope ---------------------
 
-    public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
+    @Override public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
         return new Provider<T>() {
-            public T get() {
+            @Override public T get() {
                 Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
 
                 @SuppressWarnings("unchecked")

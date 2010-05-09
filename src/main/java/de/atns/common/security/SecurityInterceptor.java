@@ -23,7 +23,7 @@ public class SecurityInterceptor implements MethodInterceptor {
 
 // --------------------- Interface MethodInterceptor ---------------------
 
-    public Object invoke(final MethodInvocation invocation) throws Throwable {
+    @Override public Object invoke(final MethodInvocation invocation) throws Throwable {
         final Secured secured = invocation.getMethod().getAnnotation(Secured.class);
         final SecurityUser user = securityScope.get(SecurityUser.class);
 
