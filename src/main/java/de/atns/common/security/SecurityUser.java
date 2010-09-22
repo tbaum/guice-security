@@ -11,4 +11,3 @@ public interface SecurityUser {
 
     boolean hasAccessTo(Secured secured);
 }
- 

@@ -27,7 +27,8 @@ import java.io.IOException;
 // -------------------------- OTHER METHODS --------------------------
 
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
         final String login = req.getParameter("login");
         final String password = req.getParameter("password");
 
