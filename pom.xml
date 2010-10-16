@@ -2,8 +2,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>security</artifactId>
-    <name>${groupId}:${artifactId}:${version}</name>
     <packaging>jar</packaging>
+    <name>${project.groupId}:${project.artifactId}:${project.packaging}:${project.version}</name>
 
     <parent>
         <groupId>de.atns.common</groupId>
