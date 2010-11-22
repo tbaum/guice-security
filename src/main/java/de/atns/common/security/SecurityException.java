@@ -1,10 +1,12 @@
 package de.atns.common.security;
 
+import net.customware.gwt.dispatch.shared.ServiceException;
+
 /**
  * @author tbaum
  * @since 27.11.2009
  */
-public abstract class SecurityException extends RuntimeException {
+public abstract class SecurityException extends ServiceException {
 // --------------------------- CONSTRUCTORS ---------------------------
 
     protected SecurityException() {

@@ -2,7 +2,11 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.1//EN"
         "http://google-web-toolkit.googlecode.com/svn/releases/2.1/distro-source/core/src/gwt-module.dtd">
 <module>
+    <inherits name="net.customware.gwt.dispatch.Dispatch"/>
     <source path="security">
+        <include name="SecurityException.java"/>
+        <include name="NotLogginException.java"/>
+        <include name="NotInRoleException.java"/>
         <include name="Secured.java"/>
         <include name="SecurityUser.java"/>
     </source>

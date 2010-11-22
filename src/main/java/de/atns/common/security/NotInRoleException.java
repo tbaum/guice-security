@@ -1,6 +1,5 @@
 package de.atns.common.security;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -16,8 +15,8 @@ public class NotInRoleException extends SecurityException {
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    public NotInRoleException(final Method method, Secured secured) {
-        super("invalid role to access " + method.toString());
+    public NotInRoleException(Secured secured, final String methodName) {
+        super("invalid role to access " + methodName);
         this.roles = asList(secured.value());
     }
 

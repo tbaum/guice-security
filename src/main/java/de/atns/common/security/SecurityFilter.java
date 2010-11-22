@@ -31,15 +31,12 @@ import static java.util.UUID.fromString;
 
     private final SecurityScope securityScope;
     private final SecurityService securityService;
-    private final SecurityErrorHandler errorHandler;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    @Inject public SecurityFilter(final SecurityScope securityScope, final SecurityService securityService,
-                                  final SecurityErrorHandler errorHandler) {
+    @Inject public SecurityFilter(final SecurityScope securityScope, final SecurityService securityService) {
         this.securityScope = securityScope;
         this.securityService = securityService;
-        this.errorHandler = errorHandler;
     }
 
 // ------------------------ INTERFACE METHODS ------------------------
@@ -61,12 +58,7 @@ import static java.util.UUID.fromString;
                 authFromHeader((HttpServletRequest) request);
                 authFromSession();
             }
-
-            try {
-                chain.doFilter(request, response);
-            } catch (SecurityException e) {
-                errorHandler.handleException(e);
-            }
+            chain.doFilter(request, response);
         } finally {
             currentRequest.remove();
             currentResponse.remove();
