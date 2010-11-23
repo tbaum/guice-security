@@ -60,6 +60,11 @@ import static java.util.UUID.randomUUID;
 
         final UUID uuid = randomUUID();
         cache.put(uuid, user);
+
+        // clear old user value
+        securityScope.exit();
+        securityScope.enter();
+
         securityScope.put(SecurityUser.class, user);
         return uuid;
     }
