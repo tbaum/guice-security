@@ -27,7 +27,7 @@ public class SecurityScope implements Scope {
     @Override public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
         return new Provider<T>() {
             @Override public T get() {
-                Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
+                final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
 
                 @SuppressWarnings("unchecked")
                 T current = (T) scopedObjects.get(key);
@@ -52,29 +52,29 @@ public class SecurityScope implements Scope {
         values.remove();
     }
 
-    @SuppressWarnings("unchecked") public <T> T get(Key<T> key) {
-        Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
+    @SuppressWarnings("unchecked") public <T> T get(final Key<T> key) {
+        final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
         return (T) scopedObjects.get(key);
     }
 
-    private <T> Map<Key<?>, Object> getScopedObjectMap(Key<T> key) {
-        Map<Key<?>, Object> scopedObjects = values.get();
+    private <T> Map<Key<?>, Object> getScopedObjectMap(final Key<T> key) {
+        final Map<Key<?>, Object> scopedObjects = values.get();
         if (scopedObjects == null) {
             throw new OutOfScopeException("Cannot access " + key + " outside of a scoping block");
         }
         return scopedObjects;
     }
 
-    public <T> T get(Class<T> clazz) {
+    public <T> T get(final Class<T> clazz) {
         return get(Key.get(clazz));
     }
 
-    public <T> void put(Class<T> clazz, T value) {
+    public <T> void put(final Class<T> clazz, final T value) {
         put(Key.get(clazz), value);
     }
 
-    public <T> void put(Key<T> key, T value) {
-        Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
+    public <T> void put(final Key<T> key, final T value) {
+        final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
         checkState(!scopedObjects.containsKey(key), "A value for the key %s was already seeded in this scope. " +
                 "Old value: %s New value: %s", key, scopedObjects.get(key), value);
         scopedObjects.put(key, value);

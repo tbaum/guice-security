@@ -14,7 +14,8 @@ import static java.util.UUID.randomUUID;
  * @author tbaum
  * @since 16.12.2009
  */
-@Singleton public class SecurityServiceImpl implements SecurityService {
+@Singleton
+public class SecurityServiceImpl implements SecurityService {
 // ------------------------------ FIELDS ------------------------------
 
     private static final Log LOG = LogFactory.getLog(SecurityServiceImpl.class);
@@ -70,7 +71,7 @@ import static java.util.UUID.randomUUID;
     }
 
     @Override public SecurityUser logout() {
-        SecurityUser user = currentUser();
+        final SecurityUser user = currentUser();
         cache.removeValue(user);
         return user;
     }

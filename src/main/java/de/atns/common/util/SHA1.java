@@ -8,7 +8,7 @@ public class SHA1 {
 
     public static String createSHA1Code(final String text) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            final MessageDigest md = MessageDigest.getInstance("SHA-1");
             md.update(text.getBytes(), 0, text.length());
             return convertToHex(md.digest());
         } catch (NoSuchAlgorithmException e) {
@@ -16,9 +16,9 @@ public class SHA1 {
         }
     }
 
-    private static String convertToHex(byte[] data) {
-        StringBuffer buf = new StringBuffer();
-        for (byte aData : data) {
+    private static String convertToHex(final byte[] data) {
+        final StringBuffer buf = new StringBuffer();
+        for (final byte aData : data) {
             int halfbyte = (aData >>> 4) & 0x0F;
             int two_halfs = 0;
             do {

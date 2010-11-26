@@ -11,11 +11,11 @@ import static java.util.Arrays.asList;
 public class NotInRoleException extends SecurityException {
 // ------------------------------ FIELDS ------------------------------
 
-    private List<String> roles;
+    private final List<String> roles;
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    public NotInRoleException(Secured secured, final String methodName) {
+    public NotInRoleException(final Secured secured, final String methodName) {
         super("invalid role to access " + methodName);
         this.roles = asList(secured.value());
     }

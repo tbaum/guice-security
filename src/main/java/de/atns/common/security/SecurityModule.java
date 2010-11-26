@@ -13,7 +13,7 @@ public abstract class SecurityModule<USER extends SecurityUser> extends Abstract
 // -------------------------- OTHER METHODS --------------------------
 
     @Override public final void configure() {
-        SecurityScope securityScope = new SecurityScope();
+        final SecurityScope securityScope = new SecurityScope();
         bindScope(SecurityScoped.class, securityScope);
         bind(SecurityScope.class).toInstance(securityScope);
         final SecurityInterceptor securityInterceptor = new SecurityInterceptor(securityScope);
