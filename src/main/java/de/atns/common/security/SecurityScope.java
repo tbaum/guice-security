@@ -4,11 +4,10 @@ import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import com.google.inject.internal.Maps;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.inject.internal.Preconditions.checkState;
 
 /**
  * @author tbaum
@@ -43,12 +42,16 @@ public class SecurityScope implements Scope {
 // -------------------------- OTHER METHODS --------------------------
 
     public void enter() {
-        checkState(values.get() == null, "already in security-scope");
-        values.set(Maps.<Key<?>, Object>newHashMap());
+        if (values.get() != null) {
+            throw new IllegalStateException(String.valueOf("already in security-scope"));
+        }
+        values.set(new HashMap<Key<?>, Object>());
     }
 
     public void exit() {
-        checkState(values.get() != null, "not in security-scope");
+        if (values.get() == null) {
+            throw new IllegalStateException(String.valueOf("not in security-scope"));
+        }
         values.remove();
     }
 
@@ -75,8 +78,10 @@ public class SecurityScope implements Scope {
 
     public <T> void put(final Key<T> key, final T value) {
         final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
-        checkState(!scopedObjects.containsKey(key), "A value for the key %s was already seeded in this scope. " +
-                "Old value: %s New value: %s", key, scopedObjects.get(key), value);
+        boolean expression = !scopedObjects.containsKey(key);
+        if (!expression) {
+            throw new IllegalStateException(String.valueOf(value));
+        }
         scopedObjects.put(key, value);
     }
 }
