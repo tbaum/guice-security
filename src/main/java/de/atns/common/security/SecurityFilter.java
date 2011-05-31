@@ -74,7 +74,7 @@ import static java.util.UUID.fromString;
     private void authFromHeader(final HttpServletRequest request) {
         final String uuid = request.getHeader(HEADER_NAME);
         if (uuid != null && !uuid.isEmpty()) {
-            LOG.debug("header  " + uuid);
+//            LOG.debug("header  " + uuid);
             securityService.authenticate(fromString(uuid.replaceAll("[^0-9a-z-]", "")));
         }
     }
@@ -82,7 +82,7 @@ import static java.util.UUID.fromString;
     private void authFromSession() {
         final UUID uuid = getAuthToken();
         if (uuid != null) {
-            LOG.debug("session " + uuid);
+//            LOG.debug("session " + uuid);
             securityService.authenticate(uuid);
         }
     }
