@@ -9,5 +9,9 @@ public interface SecurityUser {
 
     String getLogin();
 
+    String getToken();
+
     boolean hasAccessTo(Secured secured);
+
+    void setToken(String token);
 }

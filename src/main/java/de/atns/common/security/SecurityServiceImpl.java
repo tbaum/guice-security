@@ -41,6 +41,7 @@ public class SecurityServiceImpl implements SecurityService {
         final SecurityUser user = cache.get(uuid);
         if (user != null) {
             cache.put(uuid, user);
+            user.setToken(uuid.toString());
             securityScope.put(SecurityUser.class, user);
             return user;
         }
@@ -61,6 +62,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         final UUID uuid = randomUUID();
         cache.put(uuid, user);
+        user.setToken(uuid.toString());
 
         // clear old user value
         securityScope.exit();
