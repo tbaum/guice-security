@@ -58,7 +58,16 @@ import static java.util.UUID.fromString;
                 authFromHeader((HttpServletRequest) request);
                 authFromSession();
             }
-            chain.doFilter(request, response);
+            try {
+                chain.doFilter(request, response);
+            } catch (ServletException e) {
+                Throwable cause = e.getRootCause();
+                if (cause instanceof NotLogginException) {
+                    ((HttpServletResponse) response).setStatus(401);
+                } else if (cause instanceof NotInRoleException) {
+                    ((HttpServletResponse) response).setStatus(403);
+                } else throw e;
+            }
         } finally {
             currentRequest.remove();
             currentResponse.remove();
