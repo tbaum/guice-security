@@ -2,9 +2,8 @@ package de.atns.common.security;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.Arrays.asList;
 
 /**
  * @author tbaum
@@ -13,13 +12,15 @@ import static java.util.Arrays.asList;
 public class NotInRoleException extends SecurityException implements IsSerializable {
 // ------------------------------ FIELDS ------------------------------
 
-    private  List<String> roles;
+    private List<String> roles = new ArrayList<String>();
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
     public NotInRoleException(final Secured secured, final String methodName) {
         super("invalid role to access " + methodName);
-        this.roles = asList(secured.value());
+        for (Class<? extends SecurityRole> role : secured.value()) {
+            roles.add(role.getSimpleName());
+        }
     }
 
     public NotInRoleException() {

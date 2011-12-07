@@ -14,5 +14,5 @@ import java.lang.annotation.Target;
 public @interface Secured {
 // -------------------------- OTHER METHODS --------------------------
 
-    public abstract String[] value() default {};
+    public abstract Class<? extends SecurityRole>[] value() default {};
 }
