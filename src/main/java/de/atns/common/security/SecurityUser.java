@@ -1,5 +1,7 @@
 package de.atns.common.security;
 
+import java.util.Set;
+
 /**
  * @author tbaum
  * @since 27.11.2009
@@ -8,6 +10,8 @@ public interface SecurityUser {
 // -------------------------- OTHER METHODS --------------------------
 
     String getLogin();
+
+    Set<Class<? extends SecurityRole>> getRoles();
 
     String getToken();
 

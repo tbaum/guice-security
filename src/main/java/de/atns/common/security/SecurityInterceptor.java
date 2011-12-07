@@ -3,6 +3,9 @@ package de.atns.common.security;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author tbaum
  * @since 25.10.2009
@@ -32,10 +35,20 @@ public class SecurityInterceptor implements MethodInterceptor {
         }
 
         if (!user.hasAccessTo(secured)) {
-            throw new NotInRoleException(secured, invocation.getMethod().toString());
+            throw new NotInRoleException(invocation.getMethod().toString(), toStringList(secured));
         }
 
         return invocation.proceed();
+    }
+
+// -------------------------- OTHER METHODS --------------------------
+
+    private List<String> toStringList(Secured secured) {
+        List<String> roles = new ArrayList<String>();
+        for (Class<? extends SecurityRole> role : secured.value()) {
+            roles.add(role.getSimpleName());
+        }
+        return roles;
     }
 }
 

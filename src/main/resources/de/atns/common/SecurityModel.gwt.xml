@@ -8,6 +8,11 @@
         <include name="NotLogginException.java"/>
         <include name="NotInRoleException.java"/>
         <include name="Secured.java"/>
+        <include name="Includes.java"/>
         <include name="SecurityUser.java"/>
+        <include name="AdminRole.java"/>
+        <include name="SecurityRole.java"/>
+        <include name="SecurityRolePresentation.java"/>
+        <include name="RoleConverter.java"/>
     </source>
 </module>

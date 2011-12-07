@@ -13,6 +13,8 @@ public abstract class SecurityModule<USER extends SecurityUser> extends Abstract
 // -------------------------- OTHER METHODS --------------------------
 
     @Override public final void configure() {
+        requestStaticInjection(SecurityRolePresentation.class);
+
         final SecurityScope securityScope = new SecurityScope();
         bindScope(SecurityScoped.class, securityScope);
         bind(SecurityScope.class).toInstance(securityScope);

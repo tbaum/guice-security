@@ -16,14 +16,12 @@ public class NotInRoleException extends SecurityException implements IsSerializa
 
 // --------------------------- CONSTRUCTORS ---------------------------
 
-    public NotInRoleException(final Secured secured, final String methodName) {
-        super("invalid role to access " + methodName);
-        for (Class<? extends SecurityRole> role : secured.value()) {
-            roles.add(role.getSimpleName());
-        }
+    public NotInRoleException() {
     }
 
-    public NotInRoleException() {
+    public NotInRoleException(final String methodName, List<String> roles) {
+        super("invalid role to access " + methodName);
+        this.roles = roles;
     }
 
 // --------------------- GETTER / SETTER METHODS ---------------------
