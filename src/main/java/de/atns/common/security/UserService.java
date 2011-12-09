@@ -10,4 +10,10 @@ public interface UserService {
     SecurityUser findUser(String login, String pass);
 
     SecurityUser refreshUser(String login);
+
+    void setActive(SecurityUser user);
+
+    void setInactive(SecurityUser user);
+
+    void successfullLogin(SecurityUser user);
 }
