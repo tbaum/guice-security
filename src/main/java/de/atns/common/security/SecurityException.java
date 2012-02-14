@@ -1,12 +1,12 @@
 package de.atns.common.security;
 
-import net.customware.gwt.dispatch.shared.ServiceException;
+import java.io.Serializable;
 
 /**
  * @author tbaum
  * @since 27.11.2009
  */
-public abstract class SecurityException extends ServiceException {
+public abstract class SecurityException extends Exception implements Serializable {
 
     protected SecurityException() {
     }

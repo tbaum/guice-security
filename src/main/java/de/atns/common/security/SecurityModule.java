@@ -12,8 +12,6 @@ import static com.google.inject.matcher.Matchers.any;
 public abstract class SecurityModule<USER extends SecurityUser> extends AbstractModule {
 
     @Override public final void configure() {
-        requestStaticInjection(SecurityRolePresentation.class);
-
         final SecurityScope securityScope = new SecurityScope();
         bindScope(SecurityScoped.class, securityScope);
         bind(SecurityScope.class).toInstance(securityScope);
