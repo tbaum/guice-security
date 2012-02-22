@@ -8,20 +8,13 @@ import com.google.inject.Scope;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * @author tbaum
  * @since 27.11.2009
  */
 public class SecurityScope implements Scope {
-// ------------------------------ FIELDS ------------------------------
 
     private final ThreadLocal<Map<Key<?>, Object>> values = new ThreadLocal<Map<Key<?>, Object>>();
-
-// ------------------------ INTERFACE METHODS ------------------------
-
-
-// --------------------- Interface Scope ---------------------
 
     @Override public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
         return new Provider<T>() {
@@ -38,8 +31,6 @@ public class SecurityScope implements Scope {
             }
         };
     }
-
-// -------------------------- OTHER METHODS --------------------------
 
     public void enter() {
         if (values.get() != null) {

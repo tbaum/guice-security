@@ -14,9 +14,7 @@ import static java.util.UUID.randomUUID;
  * @author tbaum
  * @since 16.12.2009
  */
-@Singleton
-public class SecurityServiceImpl implements SecurityService {
-// ------------------------------ FIELDS ------------------------------
+@Singleton public class SecurityServiceImpl implements SecurityService {
 
     private static final Log LOG = LogFactory.getLog(SecurityServiceImpl.class);
 
@@ -25,17 +23,10 @@ public class SecurityServiceImpl implements SecurityService {
     private final SecurityScope securityScope;
     private final UserService userService;
 
-// --------------------------- CONSTRUCTORS ---------------------------
-
     @Inject public SecurityServiceImpl(final UserService userService, final SecurityScope securityScope) {
         this.userService = userService;
         this.securityScope = securityScope;
     }
-
-// ------------------------ INTERFACE METHODS ------------------------
-
-
-// --------------------- Interface SecurityService ---------------------
 
     @Override public SecurityUser authenticate(final UUID uuid) {
         final SecurityUser user = cache.get(uuid);

@@ -7,7 +7,6 @@ import net.customware.gwt.dispatch.shared.ServiceException;
  * @since 27.11.2009
  */
 public abstract class SecurityException extends ServiceException {
-// --------------------------- CONSTRUCTORS ---------------------------
 
     protected SecurityException() {
     }

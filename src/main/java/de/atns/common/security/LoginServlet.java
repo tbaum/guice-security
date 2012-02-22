@@ -14,20 +14,14 @@ import java.io.IOException;
  * @since 28.10.2009 21:39:05
  */
 @Singleton public class LoginServlet extends HttpServlet {
-// ------------------------------ FIELDS ------------------------------
 
     private final SecurityFilter securityFilter;
-
-// --------------------------- CONSTRUCTORS ---------------------------
 
     @Inject public LoginServlet(final SecurityFilter securityFilter) {
         this.securityFilter = securityFilter;
     }
 
-// -------------------------- OTHER METHODS --------------------------
-
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp)
+    @Override protected void service(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
         final String login = req.getParameter("login");
         final String password = req.getParameter("password");

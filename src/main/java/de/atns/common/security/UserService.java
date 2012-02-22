@@ -5,7 +5,6 @@ package de.atns.common.security;
  * @since 27.11.2009
  */
 public interface UserService {
-// -------------------------- OTHER METHODS --------------------------
 
     SecurityUser findUser(String login, String pass);
 

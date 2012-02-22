@@ -12,20 +12,14 @@ import javax.servlet.http.HttpServletResponse;
  * @since 28.10.2009 21:39:05
  */
 @Singleton public class LogoutServlet extends HttpServlet {
-// ------------------------------ FIELDS ------------------------------
 
     private final SecurityFilter securityFilter;
-
-// --------------------------- CONSTRUCTORS ---------------------------
 
     @Inject public LogoutServlet(final SecurityFilter securityFilter) {
         this.securityFilter = securityFilter;
     }
 
-// -------------------------- OTHER METHODS --------------------------
-
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) {
+    @Override protected void service(final HttpServletRequest req, final HttpServletResponse resp) {
         securityFilter.logout();
     }
 }

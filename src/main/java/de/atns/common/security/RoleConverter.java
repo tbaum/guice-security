@@ -8,14 +8,8 @@ import java.util.Iterator;
  * @since 08.12.11 11:28
  */
 public interface RoleConverter extends Serializable, Iterable<String> {
-// ------------------------ INTERFACE METHODS ------------------------
-
-
-// --------------------- Interface Iterable ---------------------
 
     @Override Iterator<String> iterator();
-
-// -------------------------- OTHER METHODS --------------------------
 
     Class<? extends SecurityRole> toRole(String role);
 

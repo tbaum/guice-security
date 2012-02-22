@@ -19,7 +19,6 @@ import static java.util.UUID.fromString;
  * @since 30.09.2009
  */
 @Singleton public class SecurityFilter implements Filter {
-// ------------------------------ FIELDS ------------------------------
 
     public static final String HEADER_NAME = "X-Authorization";
 
@@ -32,17 +31,10 @@ import static java.util.UUID.fromString;
     private final SecurityScope securityScope;
     private final SecurityService securityService;
 
-// --------------------------- CONSTRUCTORS ---------------------------
-
     @Inject public SecurityFilter(final SecurityScope securityScope, final SecurityService securityService) {
         this.securityScope = securityScope;
         this.securityService = securityService;
     }
-
-// ------------------------ INTERFACE METHODS ------------------------
-
-
-// --------------------- Interface Filter ---------------------
 
     @Override public void init(final FilterConfig filterConfig) throws ServletException {
     }
@@ -77,8 +69,6 @@ import static java.util.UUID.fromString;
 
     @Override public void destroy() {
     }
-
-// -------------------------- OTHER METHODS --------------------------
 
     private void authFromHeader(final HttpServletRequest request) {
         final String uuid = request.getHeader(HEADER_NAME);

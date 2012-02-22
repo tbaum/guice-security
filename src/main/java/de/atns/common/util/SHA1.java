@@ -5,7 +5,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class SHA1 {
-// -------------------------- STATIC METHODS --------------------------
 
     public static String createSHA1Code(final String text) {
         return digest(text, "SHA-1", 16);

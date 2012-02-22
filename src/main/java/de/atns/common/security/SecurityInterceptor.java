@@ -11,20 +11,12 @@ import java.util.List;
  * @since 25.10.2009
  */
 public class SecurityInterceptor implements MethodInterceptor {
-// ------------------------------ FIELDS ------------------------------
 
     private final SecurityScope securityScope;
-
-// --------------------------- CONSTRUCTORS ---------------------------
 
     public SecurityInterceptor(final SecurityScope securityScope) {
         this.securityScope = securityScope;
     }
-
-// ------------------------ INTERFACE METHODS ------------------------
-
-
-// --------------------- Interface MethodInterceptor ---------------------
 
     @Override public Object invoke(final MethodInvocation invocation) throws Throwable {
         final Secured secured = invocation.getMethod().getAnnotation(Secured.class);
@@ -40,8 +32,6 @@ public class SecurityInterceptor implements MethodInterceptor {
 
         return invocation.proceed();
     }
-
-// -------------------------- OTHER METHODS --------------------------
 
     private List<String> toStringList(Secured secured) {
         List<String> roles = new ArrayList<String>();

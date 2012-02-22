@@ -16,27 +16,19 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  */
 @Path("/auth") @Produces(APPLICATION_JSON)
 public class SecurityEndpoint {
-// ------------------------------ FIELDS ------------------------------
 
     private final SecurityFilter securityFilter;
 
-// --------------------------- CONSTRUCTORS ---------------------------
-
-    @Inject
-    public SecurityEndpoint(SecurityFilter securityFilter) {
+    @Inject public SecurityEndpoint(SecurityFilter securityFilter) {
         this.securityFilter = securityFilter;
     }
 
-// -------------------------- OTHER METHODS --------------------------
-
-    @POST @Path("/login")
-    public UUID login(@FormParam("login") String login, @FormParam("password") String password) {
+    @POST @Path("/login") public UUID login(@FormParam("login") String login, @FormParam("password") String password) {
         securityFilter.login(login, password);
         return securityFilter.getAuthToken();
     }
 
-    @POST @Path("/logout")
-    public void logout() {
+    @POST @Path("/logout") public void logout() {
         securityFilter.logout();
     }
 }

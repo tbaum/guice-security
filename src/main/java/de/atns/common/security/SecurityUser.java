@@ -7,7 +7,6 @@ import java.util.Set;
  * @since 27.11.2009
  */
 public interface SecurityUser {
-// -------------------------- OTHER METHODS --------------------------
 
     String getLogin();
 

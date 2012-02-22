@@ -7,20 +7,15 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import javax.ws.rs.core.MultivaluedMap;
 
 public final class ClientAuthFilter extends ClientFilter {
-// ------------------------------ FIELDS ------------------------------
 
     private String token;
     private final String username;
     private final String password;
     private final WebResource resource;
 
-// -------------------------- STATIC METHODS --------------------------
-
     public static WebResource login(String server, Client client) {
         return client.resource(server + "/api/auth/login");
     }
-
-// --------------------------- CONSTRUCTORS ---------------------------
 
     public ClientAuthFilter(final String username, final String password, WebResource resource) {
         this.username = username;
@@ -28,13 +23,7 @@ public final class ClientAuthFilter extends ClientFilter {
         this.resource = resource;
     }
 
-// ------------------------ INTERFACE METHODS ------------------------
-
-
-// --------------------- Interface ClientHandler ---------------------
-
-    @Override
-    public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
+    @Override public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
         addAuthHeader(cr);
         ClientResponse handle = getNext().handle(cr);
 
@@ -47,8 +36,6 @@ public final class ClientAuthFilter extends ClientFilter {
 
         return handle;
     }
-
-// -------------------------- OTHER METHODS --------------------------
 
     private void addAuthHeader(ClientRequest cr) {
         if (token == null) {

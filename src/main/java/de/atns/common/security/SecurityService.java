@@ -10,7 +10,6 @@ import java.util.UUID;
  */
 @ImplementedBy(SecurityServiceImpl.class)
 public interface SecurityService {
-// -------------------------- OTHER METHODS --------------------------
 
     SecurityUser authenticate(UUID uuid);
 

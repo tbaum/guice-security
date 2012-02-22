@@ -10,7 +10,6 @@ import static com.google.inject.matcher.Matchers.any;
  * @since 27.11.2009
  */
 public abstract class SecurityModule<USER extends SecurityUser> extends AbstractModule {
-// -------------------------- OTHER METHODS --------------------------
 
     @Override public final void configure() {
         requestStaticInjection(SecurityRolePresentation.class);

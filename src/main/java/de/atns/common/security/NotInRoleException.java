@@ -10,11 +10,8 @@ import java.util.List;
  * @since 27.11.2009
  */
 public class NotInRoleException extends SecurityException implements IsSerializable {
-// ------------------------------ FIELDS ------------------------------
 
     private List<String> roles = new ArrayList<String>();
-
-// --------------------------- CONSTRUCTORS ---------------------------
 
     public NotInRoleException() {
     }
@@ -23,8 +20,6 @@ public class NotInRoleException extends SecurityException implements IsSerializa
         super("invalid role to access " + methodName);
         this.roles = roles;
     }
-
-// --------------------- GETTER / SETTER METHODS ---------------------
 
     public List<String> getRoles() {
         return roles;
