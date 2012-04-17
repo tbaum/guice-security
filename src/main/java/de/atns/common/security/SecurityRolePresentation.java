@@ -26,4 +26,8 @@ public class SecurityRolePresentation implements Result, Comparable<SecurityRole
     public Class<? extends SecurityRole> getRole() {
         return roleConverter.toRole(role);
     }
+
+    public String getRoleName() {
+        return role;
+    }
 }
