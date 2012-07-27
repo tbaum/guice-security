@@ -24,6 +24,7 @@ import static java.util.UUID.fromString;
 
     private static final Log LOG = LogFactory.getLog(SecurityFilter.class);
     private static final String SESSION_UUID = "_SECURITY_UUID";
+    private static final String PARAMETER_NAME = "_SECURITY_UUID";
 
     private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<HttpServletRequest>();
     private final ThreadLocal<HttpServletResponse> currentResponse = new ThreadLocal<HttpServletResponse>();
@@ -48,6 +49,7 @@ import static java.util.UUID.fromString;
                 currentResponse.set((HttpServletResponse) response);
 
                 authFromHeader((HttpServletRequest) request);
+                authFromParameter((HttpServletRequest) request);
                 authFromSession();
             }
             try {
@@ -73,7 +75,13 @@ import static java.util.UUID.fromString;
     private void authFromHeader(final HttpServletRequest request) {
         final String uuid = request.getHeader(HEADER_NAME);
         if (uuid != null && !uuid.isEmpty()) {
-//            LOG.debug("header  " + uuid);
+            securityService.authenticate(fromString(uuid.replaceAll("[^0-9a-z-]", "")));
+        }
+    }
+
+    private void authFromParameter(final HttpServletRequest request) {
+        final String uuid = request.getParameter(PARAMETER_NAME);
+        if (uuid != null && !uuid.isEmpty()) {
             securityService.authenticate(fromString(uuid.replaceAll("[^0-9a-z-]", "")));
         }
     }
