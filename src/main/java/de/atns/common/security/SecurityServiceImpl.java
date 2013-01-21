@@ -51,6 +51,10 @@ import static java.util.UUID.randomUUID;
             return null;
         }
 
+        return login(user);
+    }
+
+    @Override public UUID login(SecurityUser user) {
         final UUID uuid = randomUUID();
         cache.put(uuid, user);
         user.setToken(uuid.toString());

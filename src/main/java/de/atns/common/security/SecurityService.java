@@ -17,5 +17,7 @@ public interface SecurityService {
 
     UUID login(String login, String password);
 
+    UUID login(SecurityUser securityUser);
+
     SecurityUser logout();
 }

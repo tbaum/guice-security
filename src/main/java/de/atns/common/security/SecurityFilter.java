@@ -47,10 +47,14 @@ import static java.util.UUID.fromString;
             if (request instanceof HttpServletRequest) {
                 currentRequest.set((HttpServletRequest) request);
                 currentResponse.set((HttpServletResponse) response);
-
-                authFromHeader((HttpServletRequest) request);
-                authFromParameter((HttpServletRequest) request);
-                authFromSession();
+                try {
+                    authFromHeader((HttpServletRequest) request);
+                    authFromParameter((HttpServletRequest) request);
+                    authFromSession();
+                } catch (IllegalArgumentException e) {
+                    ((HttpServletResponse) response).setStatus(401);
+                    return;
+                }
             }
             try {
                 chain.doFilter(request, response);
@@ -61,6 +65,12 @@ import static java.util.UUID.fromString;
                 } else if (cause instanceof NotInRoleException) {
                     ((HttpServletResponse) response).setStatus(403);
                 } else throw e;
+            } catch (Exception e) {
+                if (e instanceof NotLogginException) {
+                    ((HttpServletResponse) response).setStatus(401);
+                } else if (e instanceof NotInRoleException) {
+                    ((HttpServletResponse) response).setStatus(403);
+                } else throw new ServletException(e);
             }
         } finally {
             currentRequest.remove();
