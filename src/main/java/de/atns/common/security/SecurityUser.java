@@ -14,7 +14,7 @@ public interface SecurityUser {
 
     String getToken();
 
-    boolean hasAccessTo(Secured secured);
-
     void setToken(String token);
+
+    boolean hasAccessTo(Secured secured);
 }

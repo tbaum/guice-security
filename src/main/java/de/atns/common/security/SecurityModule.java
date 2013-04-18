@@ -9,14 +9,14 @@ import static com.google.inject.matcher.Matchers.any;
  * @author tbaum
  * @since 27.11.2009
  */
-public abstract class SecurityModule<USER extends SecurityUser> extends AbstractModule {
+public abstract class SecurityModule extends AbstractModule {
 
     @Override public final void configure() {
         final SecurityScope securityScope = new SecurityScope();
         bindScope(SecurityScoped.class, securityScope);
         bind(SecurityScope.class).toInstance(securityScope);
-        final SecurityInterceptor securityInterceptor = new SecurityInterceptor(securityScope);
-        bindInterceptor(any(), annotatedWith(Secured.class), securityInterceptor);
+        bindInterceptor(any(), annotatedWith(Secured.class), new SecurityInterceptor(securityScope));
+        bindInterceptor(any(), annotatedWith(SecurityScoped.class), new SecurityScopedInterceptor(securityScope));
 
         configureSecurity();
     }

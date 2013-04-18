@@ -20,7 +20,7 @@ public class SecurityInterceptor implements MethodInterceptor {
 
     @Override public Object invoke(final MethodInvocation invocation) throws Throwable {
         final Secured secured = invocation.getMethod().getAnnotation(Secured.class);
-        final SecurityUser user = securityScope.get(SecurityUser.class);
+        final SecurityUser user = securityScope.get();
 
         if (user == null) {
             throw new NotLogginException();

@@ -3,11 +3,9 @@ package de.atns.common.security;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * @author tbaum
@@ -16,16 +14,19 @@ import java.io.IOException;
 @Singleton public class LoginServlet extends HttpServlet {
 
     private final SecurityFilter securityFilter;
+    private final SecurityService securityService;
+    private final UserService userService;
 
-    @Inject public LoginServlet(final SecurityFilter securityFilter) {
+    @Inject
+    public LoginServlet(final SecurityFilter securityFilter, SecurityService securityService, UserService userService) {
         this.securityFilter = securityFilter;
+        this.securityService = securityService;
+        this.userService = userService;
     }
 
-    @Override protected void service(final HttpServletRequest req, final HttpServletResponse resp)
-            throws ServletException, IOException {
-        final String login = req.getParameter("login");
-        final String password = req.getParameter("password");
-
-        securityFilter.login(login, password);
+    @Override protected void service(final HttpServletRequest req, final HttpServletResponse resp) {
+        SecurityUser user = userService.findUser(req.getParameter("login"), req.getParameter("password"));
+        String token = user == null ? null : securityService.authenticate(user);
+        securityFilter.setSessionToken(token);
     }
 }

@@ -6,13 +6,8 @@ package de.atns.common.security;
  */
 public interface UserService {
 
-    SecurityUser findUser(String login, String pass);
+    SecurityUser findUser(String login);
 
-    SecurityUser refreshUser(String login);
+    SecurityUser findUser(String login, String password);
 
-    void setActive(SecurityUser user);
-
-    void setInactive(SecurityUser user);
-
-    void successfullLogin(SecurityUser user);
 }

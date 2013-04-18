@@ -14,6 +14,7 @@ import java.util.Map;
  */
 public class SecurityScope implements Scope {
 
+    public static final Key<SecurityUser> KEY = Key.get(SecurityUser.class);
     private final ThreadLocal<Map<Key<?>, Object>> values = new ThreadLocal<Map<Key<?>, Object>>();
 
     @Override public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
@@ -21,7 +22,7 @@ public class SecurityScope implements Scope {
             @Override public T get() {
                 final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
 
-                @SuppressWarnings("unchecked")
+                //noinspection unchecked
                 T current = (T) scopedObjects.get(key);
                 if (current == null && !scopedObjects.containsKey(key)) {
                     current = unscoped.get();
@@ -33,47 +34,38 @@ public class SecurityScope implements Scope {
     }
 
     public void enter() {
-        if (values.get() != null) {
-            throw new IllegalStateException(String.valueOf("already in security-scope"));
+        if (inScope()) {
+            throw new IllegalStateException("already in a security-scope block");
         }
         values.set(new HashMap<Key<?>, Object>());
     }
 
-    public void exit() {
-        if (values.get() == null) {
-            throw new IllegalStateException(String.valueOf("not in security-scope"));
-        }
-        values.remove();
+    public boolean inScope() {
+        return values.get() != null;
     }
 
-    @SuppressWarnings("unchecked") public <T> T get(final Key<T> key) {
-        final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
-        return (T) scopedObjects.get(key);
+    public void exit() {
+        if (!inScope()) {
+            throw new IllegalStateException("outside of a security-scope block");
+        }
+        values.remove();
     }
 
     private <T> Map<Key<?>, Object> getScopedObjectMap(final Key<T> key) {
         final Map<Key<?>, Object> scopedObjects = values.get();
         if (scopedObjects == null) {
-            throw new OutOfScopeException("Cannot access " + key + " outside of a scoping block");
+            throw new OutOfScopeException("Cannot access " + key + " outside of a security-scope block");
         }
         return scopedObjects;
     }
 
-    public <T> T get(final Class<T> clazz) {
-        return get(Key.get(clazz));
+    public SecurityUser get() {
+        final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(KEY);
+        return (SecurityUser) scopedObjects.get(KEY);
     }
 
-    public <T> void put(final Class<T> clazz, final T value) {
-        put(Key.get(clazz), value);
-    }
-
-    public <T> void put(final Key<T> key, final T value) {
-        final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
-        boolean expression = !scopedObjects.containsKey(key);
-        if (!expression) {
-            throw new IllegalStateException(String.valueOf(value));
-        }
-        scopedObjects.put(key, value);
+    public void put(SecurityUser value) {
+        final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(KEY);
+        scopedObjects.put(KEY, value);
     }
 }
- 

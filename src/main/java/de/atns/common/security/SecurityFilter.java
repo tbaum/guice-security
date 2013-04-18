@@ -2,18 +2,14 @@ package de.atns.common.security;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.util.UUID;
 
-import static java.util.UUID.fromString;
+import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 /**
  * @author tbaum
@@ -22,139 +18,109 @@ import static java.util.UUID.fromString;
 @Singleton public class SecurityFilter implements Filter {
 
     public static final String HEADER_NAME = "X-Authorization";
-    private static final Log LOG = LogFactory.getLog(SecurityFilter.class);
-    private static final String SESSION_UUID = "_SECURITY_UUID";
+    private static final String SESSION_TOKEN = "_SECURITY_UUID";
     private static final String PARAMETER_NAME = "_SECURITY_UUID";
     private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<HttpServletRequest>();
     private final ThreadLocal<HttpServletResponse> currentResponse = new ThreadLocal<HttpServletResponse>();
-    private final SecurityScope securityScope;
     private final SecurityService securityService;
     private final RoleConverter roleConverter;
+    private final UserService userService;
 
     @Inject
-    public SecurityFilter(final SecurityScope securityScope, SecurityService securityService, RoleConverter roleConverter) {
-        this.securityScope = securityScope;
+    public SecurityFilter(SecurityService securityService, RoleConverter roleConverter, UserService userService) {
         this.securityService = securityService;
         this.roleConverter = roleConverter;
+        this.userService = userService;
     }
 
     @Override public void init(final FilterConfig filterConfig) throws ServletException {
     }
 
-    @Override public void doFilter(final ServletRequest request, final ServletResponse response,
-                                   final FilterChain chain) throws IOException, ServletException {
-        securityScope.enter();
-        UUID basicAuth = null;
+    @Override @SecurityScoped
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         try {
-            if (request instanceof HttpServletRequest) {
-                currentRequest.set((HttpServletRequest) request);
-                currentResponse.set((HttpServletResponse) response);
-                try {
-                    authFromHeader((HttpServletRequest) request);
-                    basicAuth = authBasicHeader((HttpServletRequest) request);
-                    authFromParameter((HttpServletRequest) request);
-                    authFromSession();
-                    SecurityUser currentUser = securityService.currentUser();
-                    if (currentUser != null) {
-                        ((HttpServletResponse) response).addHeader("X-Authorized-User", currentUser.getLogin());
-                        for (Class<? extends SecurityRole> role : currentUser.getRoles()) {
-                            ((HttpServletResponse) response).addHeader("X-Authorized-Role", roleConverter.toString(role));
-                        }
+            HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+            currentRequest.set(httpServletRequest);
+
+            HttpServletResponse servletResponse = (HttpServletResponse) response;
+            currentResponse.set(servletResponse);
+            try {
+                authenticateToken(httpServletRequest.getHeader(HEADER_NAME));
+                authBasicHeader(httpServletRequest);
+                authenticateToken(httpServletRequest.getParameter(PARAMETER_NAME));
+                authFromSession(httpServletRequest);
+
+                SecurityUser currentUser = securityService.currentUser();
+                if (currentUser != null) {
+                    servletResponse.addHeader("X-Authorized-User", currentUser.getLogin());
+                    for (Class<? extends SecurityRole> role : currentUser.getRoles()) {
+                        servletResponse.addHeader("X-Authorized-Role", roleConverter.toString(role));
                     }
-                } catch (IllegalArgumentException e) {
-                    ((HttpServletResponse) response).setStatus(401);
-                    return;
                 }
+            } catch (IllegalArgumentException e) {
+                servletResponse.setStatus(401);
+                return;
             }
             try {
                 chain.doFilter(request, response);
-            } catch (ServletException e) {
-                Throwable cause = e.getRootCause();
-                if (cause instanceof NotLogginException) {
-                    ((HttpServletResponse) response).setStatus(401);
-                } else if (cause instanceof NotInRoleException) {
-                    ((HttpServletResponse) response).setStatus(403);
-                } else throw e;
-            } catch (Exception e) {
-                if (e instanceof NotLogginException) {
-                    ((HttpServletResponse) response).setStatus(401);
-                } else if (e instanceof NotInRoleException) {
-                    ((HttpServletResponse) response).setStatus(403);
-                } else throw new ServletException(e);
+            } catch (NotLogginException e) {
+                servletResponse.setStatus(401);
+            } catch (NotInRoleException e) {
+                servletResponse.setStatus(403);
             }
         } finally {
-            if (basicAuth != null) {
-                securityService.logout();
-            }
             currentRequest.remove();
             currentResponse.remove();
-            securityScope.exit();
         }
     }
 
     @Override public void destroy() {
     }
 
-    private void authFromHeader(final HttpServletRequest request) {
-        final String uuid = request.getHeader(HEADER_NAME);
-        if (uuid != null && !uuid.isEmpty()) {
-            securityService.authenticate(fromString(uuid.replaceAll("[^0-9a-z-]", "")));
+    private void authenticateToken(String token) {
+        if (token == null || token.isEmpty()) {
+            return;
         }
+        token = securityService.authenticate(token);
+        currentResponse.get().setHeader(HEADER_NAME, token);
     }
 
-    private UUID authBasicHeader(final HttpServletRequest request) {
+    private void authBasicHeader(final HttpServletRequest request) {
         final String auth = request.getHeader("Authorization");
-        if (auth != null && auth.toLowerCase().indexOf("basic ") == 0) {
-            String[] u = new String(DatatypeConverter.parseBase64Binary(auth.substring(6))).split(":");
-            return securityService.login(u[0], u[1]);
+
+        if (auth == null || auth.toLowerCase().indexOf("basic ") != 0) {
+            return;
         }
-        return null;
+
+        String[] u = new String(parseBase64Binary(auth.substring(6))).split(":");
+        final SecurityUser user = userService.findUser(u[0], u[1]);
+        String token = user == null ? null : securityService.authenticate(user);
+        currentResponse.get().setHeader(HEADER_NAME, token);
     }
 
-    private void authFromParameter(final HttpServletRequest request) {
-        final String uuid = request.getParameter(PARAMETER_NAME);
-        if (uuid != null && !uuid.isEmpty()) {
-            securityService.authenticate(fromString(uuid.replaceAll("[^0-9a-z-]", "")));
+    private void authFromSession(HttpServletRequest httpServletRequest) {
+        final HttpSession session = httpServletRequest.getSession(false);
+        if (session == null) {
+            return;
         }
+
+        authenticateToken((String) session.getAttribute(SESSION_TOKEN));
     }
 
-    private void authFromSession() {
-        final UUID uuid = getAuthToken();
-        if (uuid != null) {
-//            LOG.debug("session " + uuid);
-            securityService.authenticate(uuid);
-        }
-    }
-
-    public UUID getAuthToken() {
-        final HttpSession session = currentRequest.get().getSession(false);
-        if (session != null) {
-            return (UUID) session.getAttribute(SESSION_UUID);
-        }
-        return null;
-    }
-
-    public UUID login(final String login, final String password) {
-        final UUID token = securityService.login(login, password);
-        authenticate(token);
-        return token;
-    }
-
-    public void authenticate(final UUID token) {
-        if (token == null) {
-            final HttpSession session = currentRequest.get().getSession(false);
-            if (session != null) {
-                session.removeAttribute(SESSION_UUID);
-            }
-        } else {
-            final HttpSession session = currentRequest.get().getSession(true);
-            session.setAttribute(SESSION_UUID, token);
-            currentResponse.get().setHeader(HEADER_NAME, token.toString());
-        }
+    void setSessionToken(String token) {
+        currentRequest.get().getSession(true).setAttribute(SESSION_TOKEN, token);
+        currentResponse.get().setHeader(HEADER_NAME, token);
     }
 
     public void logout() {
-        securityService.logout();
-        currentRequest.get().removeAttribute(SESSION_UUID);
+        HttpServletRequest request = currentRequest.get();
+
+        final HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.removeAttribute(SESSION_TOKEN);
+        }
+
+        securityService.clearAuthentication();
     }
 }

@@ -29,14 +29,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.atns.common</groupId>
-            <artifactId>cache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
