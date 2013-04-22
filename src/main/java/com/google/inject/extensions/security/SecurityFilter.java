@@ -52,25 +52,20 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
                 authenticateToken(httpServletRequest.getHeader(HEADER_NAME));
                 authBasicHeader(httpServletRequest);
                 authenticateToken(httpServletRequest.getParameter(PARAMETER_NAME));
-                authFromSession(httpServletRequest);
-
-                SecurityUser currentUser = securityService.currentUser();
-                if (currentUser != null) {
-                    servletResponse.addHeader("X-Authorized-User", currentUser.getLogin());
-
-                    Set<Class<? extends SecurityRole>> allRoles = new HashSet<Class<? extends SecurityRole>>();
-                    for (Class<? extends SecurityRole> role : currentUser.getRoles()) {
-                        allRoles.addAll(resolveAll(role));
-                    }
-
-                    for (Class<? extends SecurityRole> r1 : allRoles) {
-                        servletResponse.addHeader("X-Authorized-Role", roleConverter.toString(r1));
-                    }
-                }
             } catch (IllegalArgumentException e) {
+                logout();
                 servletResponse.setStatus(401);
                 return;
             }
+
+            try {
+                authFromSession(httpServletRequest);
+            } catch (IllegalArgumentException e) {
+                logout();
+            }
+
+            sendHeaders(servletResponse);
+
             try {
                 chain.doFilter(request, response);
             } catch (NotLogginException e) {
@@ -81,6 +76,22 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
         } finally {
             currentRequest.remove();
             currentResponse.remove();
+        }
+    }
+
+    private void sendHeaders(HttpServletResponse servletResponse) {
+        SecurityUser currentUser = securityService.currentUser();
+        if (currentUser != null) {
+            servletResponse.addHeader("X-Authorized-User", currentUser.getLogin());
+
+            Set<Class<? extends SecurityRole>> allRoles = new HashSet<Class<? extends SecurityRole>>();
+            for (Class<? extends SecurityRole> role : currentUser.getRoles()) {
+                allRoles.addAll(resolveAll(role));
+            }
+
+            for (Class<? extends SecurityRole> r1 : allRoles) {
+                servletResponse.addHeader("X-Authorized-Role", roleConverter.toString(r1));
+            }
         }
     }
 

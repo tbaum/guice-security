@@ -41,7 +41,9 @@ import com.google.inject.Singleton;
 
     @Override public SecurityUser clearAuthentication() {
         SecurityUser user = currentUser();
-        user.setToken(null);
+        if (user != null) {
+            user.setToken(null);
+        }
         securityScope.put(null);
 
         return user;
