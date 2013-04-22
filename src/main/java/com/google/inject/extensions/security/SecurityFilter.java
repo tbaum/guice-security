@@ -117,7 +117,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
         authenticateToken((String) session.getAttribute(SESSION_TOKEN));
     }
 
-    void setSessionToken(String token) {
+    public void setSessionToken(String token) {
         currentRequest.get().getSession(true).setAttribute(SESSION_TOKEN, token);
         currentResponse.get().setHeader(HEADER_NAME, token);
     }
