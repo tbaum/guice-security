@@ -8,7 +8,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
+import static com.google.inject.extensions.security.ClassHelper.resolveAll;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 /**
@@ -54,10 +57,14 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
                 SecurityUser currentUser = securityService.currentUser();
                 if (currentUser != null) {
                     servletResponse.addHeader("X-Authorized-User", currentUser.getLogin());
+
+                    Set<Class<? extends SecurityRole>> allRoles = new HashSet<Class<? extends SecurityRole>>();
                     for (Class<? extends SecurityRole> role : currentUser.getRoles()) {
-                        for (Class<? extends SecurityRole> r1 : ClassHelper.resolveAll(role)) {
-                            servletResponse.addHeader("X-Authorized-Role", roleConverter.toString(r1));
-                        }
+                        allRoles.addAll(resolveAll(role));
+                    }
+
+                    for (Class<? extends SecurityRole> r1 : allRoles) {
+                        servletResponse.addHeader("X-Authorized-Role", roleConverter.toString(r1));
                     }
                 }
             } catch (IllegalArgumentException e) {
