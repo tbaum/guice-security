@@ -55,7 +55,9 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
                 if (currentUser != null) {
                     servletResponse.addHeader("X-Authorized-User", currentUser.getLogin());
                     for (Class<? extends SecurityRole> role : currentUser.getRoles()) {
-                        servletResponse.addHeader("X-Authorized-Role", roleConverter.toString(role));
+                        for (Class<? extends SecurityRole> r1 : ClassHelper.resolveAll(role)) {
+                            servletResponse.addHeader("X-Authorized-Role", roleConverter.toString(r1));
+                        }
                     }
                 }
             } catch (IllegalArgumentException e) {

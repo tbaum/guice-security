@@ -13,5 +13,6 @@
         <include name="SecurityRole.java"/>
         <include name="SecurityRolePresentation.java"/>
         <include name="RoleConverter.java"/>
+        <include name="AbstractRoleConverter.java"/>
     </source>
 </module>
