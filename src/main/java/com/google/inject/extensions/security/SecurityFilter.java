@@ -52,7 +52,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
                 authenticateToken(httpServletRequest.getHeader(HEADER_NAME));
                 authBasicHeader(httpServletRequest);
                 authenticateToken(httpServletRequest.getParameter(PARAMETER_NAME));
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 logout();
                 servletResponse.setStatus(401);
                 return;
@@ -60,7 +60,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
             try {
                 authFromSession(httpServletRequest);
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 logout();
             }
 
