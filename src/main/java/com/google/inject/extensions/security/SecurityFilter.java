@@ -4,10 +4,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import javax.servlet.*;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,6 +26,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
     public static final String HEADER_NAME = "X-Authorization";
     private static final String SESSION_TOKEN = "_SECURITY_UUID";
     private static final String PARAMETER_NAME = "_SECURITY_UUID";
+    private static final String COOKIE_NAME = "_SECURITY_UUID";
     private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<HttpServletRequest>();
     private final ThreadLocal<HttpServletResponse> currentResponse = new ThreadLocal<HttpServletResponse>();
     private final SecurityService securityService;
@@ -52,6 +56,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
                 authenticateToken(httpServletRequest.getHeader(HEADER_NAME));
                 authBasicHeader(httpServletRequest);
                 authenticateToken(httpServletRequest.getParameter(PARAMETER_NAME));
+                authenticateToken(findCookie(httpServletRequest.getCookies()));
             } catch (Exception e) {
                 logout();
                 servletResponse.setStatus(401);
@@ -77,6 +82,15 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
             currentRequest.remove();
             currentResponse.remove();
         }
+    }
+
+    private String findCookie(Cookie[] cookies) throws UnsupportedEncodingException {
+        for (Cookie cookie : cookies) {
+            if (COOKIE_NAME.equals(cookie.getName())) {
+                return URLDecoder.decode(cookie.getValue(), "UTF-8");
+            }
+        }
+        return null;
     }
 
     private void sendHeaders(HttpServletResponse servletResponse) {
