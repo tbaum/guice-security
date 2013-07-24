@@ -85,6 +85,9 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
     }
 
     private String findCookie(Cookie[] cookies) throws UnsupportedEncodingException {
+        if (cookies == null) {
+            return null;
+        }
         for (Cookie cookie : cookies) {
             if (COOKIE_NAME.equals(cookie.getName())) {
                 return URLDecoder.decode(cookie.getValue(), "UTF-8");
