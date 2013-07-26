@@ -2,12 +2,13 @@ package com.google.inject.extensions.security;
 
 import com.google.inject.Inject;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.util.Map;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.Response.ok;
 
 /**
  * @author tbaum
@@ -24,13 +25,23 @@ public class SecurityEndpoint {
         this.userService = userService;
     }
 
-    @POST @Path("/login")
+    @POST @Path("/login") @Consumes(APPLICATION_FORM_URLENCODED)
     public String login(@FormParam("login") String login, @FormParam("password") String password) {
         SecurityUser user = userService.findUser(login, password);
         return user == null ? null : securityService.authenticate(user);
     }
 
+    @POST @Path("/login") @Consumes(APPLICATION_JSON)
+    public String login(Map<String, String> data) {
+        SecurityUser user = userService.findUser(data.get("login"), data.get("password"));
+        return user == null ? null : securityService.authenticate(user);
+    }
+
     @POST @Path("/logout") public void logout() {
         securityService.clearAuthentication();
+    }
+
+    @GET @Path("/info") @Secured public Response info() {
+        return ok().build();
     }
 }
