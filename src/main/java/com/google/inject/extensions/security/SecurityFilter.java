@@ -59,8 +59,6 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
                 authenticateToken(findCookie(httpServletRequest.getCookies()));
             } catch (Exception e) {
                 logout();
-                servletResponse.setStatus(401);
-                return;
             }
 
             try {
