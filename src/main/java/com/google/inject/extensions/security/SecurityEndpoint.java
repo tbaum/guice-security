@@ -3,12 +3,11 @@ package com.google.inject.extensions.security;
 import com.google.inject.Inject;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.ok;
 
 /**
  * @author tbaum
@@ -32,16 +31,29 @@ public class SecurityEndpoint {
     }
 
     @POST @Path("/login") @Consumes(APPLICATION_JSON)
-    public String login(Map<String, String> data) {
+    public Map<String, String> login(Map<String, String> data) {
         SecurityUser user = userService.findUser(data.get("login"), data.get("password"));
-        return user == null ? null : securityService.authenticate(user);
+        if (user == null) {
+            throw new RuntimeException("unable to authenticate");
+        }
+        return getResult(securityService.authenticate(user), user.getLogin());
+    }
+
+    private Map<String, String> getResult(String authenticate, String login) {
+        Map<String, String> result = new HashMap<String, String>();
+        result.put("success", "true");
+        result.put("token", authenticate);
+        result.put("login", login);
+        return result;
     }
 
     @POST @Path("/logout") public void logout() {
         securityService.clearAuthentication();
     }
 
-    @GET @Path("/info") @Secured public Response info() {
-        return ok().build();
+    @GET @Path("/check") @Secured
+    public Map<String, String> authenticate() {
+        SecurityUser securityUser = securityService.currentUser();
+        return getResult(securityUser.getToken(), securityUser.getLogin());
     }
 }
