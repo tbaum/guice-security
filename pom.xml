@@ -24,6 +24,11 @@
         </plugins>
     </build>
 
+    <scm>
+        <connection>scm:git:https://code.google.com/p/guice-security/</connection>
+        <url>scm:git:https://code.google.com/p/guice-security/</url>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>com.google.inject</groupId>
