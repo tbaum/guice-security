@@ -15,6 +15,4 @@ public interface SecurityUser {
     String getToken();
 
     void setToken(String token);
-
-    boolean hasAccessTo(Secured secured);
 }

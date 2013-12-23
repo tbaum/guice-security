@@ -15,7 +15,9 @@ public abstract class SecurityModule extends AbstractModule {
         final SecurityScope securityScope = new SecurityScope();
         bindScope(SecurityScoped.class, securityScope);
         bind(SecurityScope.class).toInstance(securityScope);
-        bindInterceptor(any(), annotatedWith(Secured.class), new SecurityInterceptor(securityScope));
+        SecurityInterceptor securityInterceptor = new SecurityInterceptor();
+        requestInjection(securityInterceptor);
+        bindInterceptor(any(), annotatedWith(Secured.class), securityInterceptor);
         bindInterceptor(any(), annotatedWith(SecurityScoped.class), new SecurityScopedInterceptor(securityScope));
 
         configureSecurity();

@@ -15,4 +15,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Secured {
 
     public abstract Class<? extends SecurityRole>[] value() default {};
+
+    public abstract Class<? extends SecurityDecisionMaker> decisionMaker() default InRoleDecisionMaker.class;
 }

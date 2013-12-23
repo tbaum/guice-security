@@ -11,9 +11,8 @@ import static java.util.Arrays.asList;
  */
 public class SimpleUser implements SecurityUser {
     private final Set<Class<? extends SecurityRole>> roles;
-
-    private String token;
     private final String login;
+    private String token;
 
     @SafeVarargs public SimpleUser(String login, Class<? extends SecurityRole>... roles) {
         this.roles = new HashSet<>(asList(roles));
@@ -25,7 +24,7 @@ public class SimpleUser implements SecurityUser {
     }
 
     @Override public Set<Class<? extends SecurityRole>> getRoles() {
-        return null;
+        return roles;
     }
 
     @Override public String getToken() {
@@ -34,22 +33,5 @@ public class SimpleUser implements SecurityUser {
 
     @Override public void setToken(String token) {
         this.token = token;
-    }
-
-    @Override public boolean hasAccessTo(final Secured secured) {
-        Class<? extends SecurityRole>[] requiredRoles = secured.value();
-
-        if (requiredRoles.length == 0) {
-            return true;
-        }
-
-        for (final Class myRole : roles) {
-            for (final Class<? extends SecurityRole> s : requiredRoles) {
-                if (s.isAssignableFrom(myRole)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }
