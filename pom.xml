@@ -49,8 +49,13 @@
     </build>
 
     <scm>
+        <!--
         <connection>scm:git:https://code.google.com/p/guice-security/</connection>
         <url>scm:git:https://code.google.com/p/guice-security/</url>
+        -->
+        <connection>scm:git:git@github.com:tbaum/guice-security.git</connection>
+        <url>scm:git:git@github.com:tbaum/guice-security.git</url>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
