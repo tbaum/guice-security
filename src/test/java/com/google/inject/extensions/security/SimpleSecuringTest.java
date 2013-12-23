@@ -6,8 +6,6 @@ import com.google.inject.OutOfScopeException;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.google.inject.extensions.security.SecurityTokenServiceImpl.createSalt;
-import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.junit.Assert.fail;
 
 /**
@@ -16,21 +14,13 @@ import static org.junit.Assert.fail;
  */
 public class SimpleSecuringTest {
 
-    private static final String TEST_SALT = createSalt();
     private A a;
     private SecurityScope securityScope;
     private SecurityService securityService;
 
     @Before
     public void cleanUp() {
-        Injector injector = Guice.createInjector(new SecurityModule() {
-            @Override protected void configureSecurity() {
-                bind(SecurityTokenService.class).toInstance(
-                        new SecurityTokenServiceImpl(MINUTES.toMillis(10), MINUTES.toMillis(20), TEST_SALT, 5));
-
-                bind(UserService.class).toInstance(new MockUserService());
-            }
-        });
+        Injector injector = Guice.createInjector(new TestSecurityModule());
 
         a = injector.getInstance(A.class);
         securityService = injector.getInstance(SecurityService.class);
