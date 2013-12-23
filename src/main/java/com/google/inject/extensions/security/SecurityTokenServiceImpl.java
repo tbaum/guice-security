@@ -18,8 +18,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class SecurityTokenServiceImpl implements SecurityTokenService {
     private static final Logger LOG = getLogger(SecurityTokenServiceImpl.class);
-    private final Map<String, Token> userCache = new HashMap<String, Token>();
-    private final Map<String, Token> tokenCache = new ConcurrentHashMap<String, Token>();
+    private final Map<String, Token> userCache = new HashMap<>();
+    private final Map<String, Token> tokenCache = new ConcurrentHashMap<>();
     private final long maxAge;
     private final int complexity;
     private final long regenerateAfter;
@@ -140,6 +140,14 @@ public class SecurityTokenServiceImpl implements SecurityTokenService {
         return token;
     }
 
+    protected Map<String, Token> getUserCache() {
+        return userCache;
+    }
+
+    protected Map<String, Token> getTokenCache() {
+        return tokenCache;
+    }
+
     private synchronized void cleanupTokenCache() {
         if (!isExpired(oldestToken)) {
             return;
@@ -147,7 +155,7 @@ public class SecurityTokenServiceImpl implements SecurityTokenService {
 
         LOG.debug("check for expired tokens");
         oldestToken = Long.MAX_VALUE;
-        for (Token token : new ArrayList<Token>(userCache.values())) {
+        for (Token token : new ArrayList<>(userCache.values())) {
             if (isExpired(token.valid)) {
                 LOG.debug("remove expired token from cache {}", token);
                 userCache.remove(token.user);

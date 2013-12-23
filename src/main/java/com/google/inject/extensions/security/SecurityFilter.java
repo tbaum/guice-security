@@ -27,8 +27,8 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
     private static final String SESSION_TOKEN = "_SECURITY_UUID";
     private static final String PARAMETER_NAME = "_SECURITY_UUID";
     private static final String COOKIE_NAME = "_SECURITY_UUID";
-    private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<HttpServletRequest>();
-    private final ThreadLocal<HttpServletResponse> currentResponse = new ThreadLocal<HttpServletResponse>();
+    private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
+    private final ThreadLocal<HttpServletResponse> currentResponse = new ThreadLocal<>();
     private final SecurityService securityService;
     private final RoleConverter roleConverter;
     private final UserService userService;
@@ -99,7 +99,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
         if (currentUser != null) {
             servletResponse.addHeader("X-Authorized-User", currentUser.getLogin());
 
-            Set<Class<? extends SecurityRole>> allRoles = new HashSet<Class<? extends SecurityRole>>();
+            Set<Class<? extends SecurityRole>> allRoles = new HashSet<>();
             for (Class<? extends SecurityRole> role : currentUser.getRoles()) {
                 allRoles.addAll(resolveAll(role));
             }

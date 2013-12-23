@@ -1,14 +1,13 @@
 package com.google.inject.extensions.security;
 
-import com.google.inject.extensions.security.SecurityRole;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class ClassHelper {
-    private static Map<Class<? extends SecurityRole>, Set<Class<? extends SecurityRole>>> cache = new HashMap<Class<? extends SecurityRole>, Set<Class<? extends SecurityRole>>>();
+
+    private static final Map<Class<? extends SecurityRole>, Set<Class<? extends SecurityRole>>> cache = new HashMap<>();
 
     public static Set<Class<? extends SecurityRole>> resolveAll(Class<? extends SecurityRole> aClass) {
         if (cache.containsKey(aClass)) return cache.get(aClass);

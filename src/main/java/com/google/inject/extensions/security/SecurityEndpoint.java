@@ -40,7 +40,7 @@ public class SecurityEndpoint {
     }
 
     private Map<String, String> getResult(String authenticate, String login) {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         result.put("success", "true");
         result.put("token", authenticate);
         result.put("login", login);

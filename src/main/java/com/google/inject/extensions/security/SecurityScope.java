@@ -12,10 +12,10 @@ import java.util.Map;
  * @author tbaum
  * @since 27.11.2009
  */
-public class SecurityScope implements Scope {
+public class SecurityScope implements Scope, AutoCloseable {
 
     public static final Key<SecurityUser> KEY = Key.get(SecurityUser.class);
-    private final ThreadLocal<Map<Key<?>, Object>> values = new ThreadLocal<Map<Key<?>, Object>>();
+    private final ThreadLocal<Map<Key<?>, Object>> values = new ThreadLocal<>();
 
     @Override public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
         return new Provider<T>() {
@@ -33,11 +33,12 @@ public class SecurityScope implements Scope {
         };
     }
 
-    public void enter() {
+    public SecurityScope enter() {
         if (inScope()) {
             throw new IllegalStateException("already in a security-scope block");
         }
         values.set(new HashMap<Key<?>, Object>());
+        return this;
     }
 
     public boolean inScope() {
@@ -67,5 +68,9 @@ public class SecurityScope implements Scope {
     public void put(SecurityUser value) {
         final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(KEY);
         scopedObjects.put(KEY, value);
+    }
+
+    @Override public void close() {
+        exit();
     }
 }

@@ -34,7 +34,7 @@ public class SecurityInterceptor implements MethodInterceptor {
     }
 
     private List<String> toStringList(Secured secured) {
-        List<String> roles = new ArrayList<String>();
+        List<String> roles = new ArrayList<>();
         for (Class<? extends SecurityRole> role : secured.value()) {
             roles.add(role.getSimpleName());
         }

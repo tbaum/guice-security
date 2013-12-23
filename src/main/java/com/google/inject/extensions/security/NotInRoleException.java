@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class NotInRoleException extends SecurityException {
 
-    private List<String> roles = new ArrayList<String>();
+    private List<String> roles = new ArrayList<>();
 
     public NotInRoleException() {
     }
