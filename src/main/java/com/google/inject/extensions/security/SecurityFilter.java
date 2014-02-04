@@ -32,12 +32,15 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
     private final SecurityService securityService;
     private final RoleConverter roleConverter;
     private final UserService userService;
+    private final SecurityAudit audit;
 
     @Inject
-    public SecurityFilter(SecurityService securityService, RoleConverter roleConverter, UserService userService) {
+    public SecurityFilter(SecurityService securityService, RoleConverter roleConverter, UserService userService,
+                          SecurityAudit audit) {
         this.securityService = securityService;
         this.roleConverter = roleConverter;
         this.userService = userService;
+        this.audit = audit;
     }
 
     @Override public void init(final FilterConfig filterConfig) throws ServletException {
@@ -47,22 +50,25 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         try {
-            HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-            currentRequest.set(httpServletRequest);
+            final HttpServletRequest servletRequest = (HttpServletRequest) request;
+            currentRequest.set(servletRequest);
 
-            HttpServletResponse servletResponse = (HttpServletResponse) response;
+            final HttpServletResponse servletResponse = (HttpServletResponse) response;
             currentResponse.set(servletResponse);
+
+            audit.startRequest(servletRequest, servletResponse);
+
             try {
-                authenticateToken(httpServletRequest.getHeader(HEADER_NAME));
-                authBasicHeader(httpServletRequest);
-                authenticateToken(httpServletRequest.getParameter(PARAMETER_NAME));
-                authenticateToken(findCookie(httpServletRequest.getCookies()));
+                authenticateToken(servletRequest.getHeader(HEADER_NAME), servletResponse);
+                authBasicHeader(servletRequest, servletResponse);
+                authenticateToken(servletRequest.getParameter(PARAMETER_NAME), servletResponse);
+                authenticateToken(findCookie(servletRequest.getCookies()), servletResponse);
             } catch (Exception e) {
                 logout();
             }
 
             try {
-                authFromSession(httpServletRequest);
+                authFromSession(servletRequest, servletResponse);
             } catch (Exception e) {
                 logout();
             }
@@ -77,6 +83,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
                 servletResponse.setStatus(403);
             }
         } finally {
+            audit.finishRequest();
             currentRequest.remove();
             currentResponse.remove();
         }
@@ -94,10 +101,10 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
         return null;
     }
 
-    private void sendHeaders(HttpServletResponse servletResponse) {
+    private void sendHeaders(HttpServletResponse response) {
         SecurityUser currentUser = securityService.currentUser();
         if (currentUser != null) {
-            servletResponse.addHeader("X-Authorized-User", currentUser.getLogin());
+            response.addHeader("X-Authorized-User", currentUser.getLogin());
 
             Set<Class<? extends SecurityRole>> allRoles = new HashSet<>();
             for (Class<? extends SecurityRole> role : currentUser.getRoles()) {
@@ -105,7 +112,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
             }
 
             for (Class<? extends SecurityRole> r1 : allRoles) {
-                servletResponse.addHeader("X-Authorized-Role", roleConverter.toString(r1));
+                response.addHeader("X-Authorized-Role", roleConverter.toString(r1));
             }
         }
     }
@@ -113,15 +120,15 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
     @Override public void destroy() {
     }
 
-    private void authenticateToken(String token) {
+    private void authenticateToken(String token, HttpServletResponse response) {
         if (token == null || token.isEmpty()) {
             return;
         }
         token = securityService.authenticate(token);
-        currentResponse.get().setHeader(HEADER_NAME, token);
+        response.setHeader(HEADER_NAME, token);
     }
 
-    private void authBasicHeader(final HttpServletRequest request) {
+    private void authBasicHeader(final HttpServletRequest request, HttpServletResponse response) {
         final String auth = request.getHeader("Authorization");
 
         if (auth == null || auth.toLowerCase().indexOf("basic ") != 0) {
@@ -131,16 +138,16 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
         String[] u = new String(parseBase64Binary(auth.substring(6))).split(":");
         final SecurityUser user = userService.findUser(u[0], u[1]);
         String token = user == null ? null : securityService.authenticate(user);
-        currentResponse.get().setHeader(HEADER_NAME, token);
+        response.setHeader(HEADER_NAME, token);
     }
 
-    private void authFromSession(HttpServletRequest httpServletRequest) {
-        final HttpSession session = httpServletRequest.getSession(false);
+    private void authFromSession(HttpServletRequest request, HttpServletResponse response) {
+        final HttpSession session = request.getSession(false);
         if (session == null) {
             return;
         }
-
-        authenticateToken((String) session.getAttribute(SESSION_TOKEN));
+        final String sessionToken = (String) session.getAttribute(SESSION_TOKEN);
+        authenticateToken(sessionToken, response);
     }
 
     public void setSessionToken(String token) {
@@ -149,13 +156,10 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
     }
 
     public void logout() {
-        HttpServletRequest request = currentRequest.get();
-
-        final HttpSession session = request.getSession(false);
+        final HttpSession session = currentRequest.get().getSession(false);
         if (session != null) {
             session.removeAttribute(SESSION_TOKEN);
         }
-
         securityService.clearAuthentication();
     }
 }
