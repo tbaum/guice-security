@@ -16,21 +16,25 @@ public class SecurityInterceptor implements MethodInterceptor {
 
     @Inject private final SecurityScope securityScope = null;
     @Inject private final Injector injector = null;
+    @Inject private final SecurityAudit audit = null;
 
     @Override public Object invoke(final MethodInvocation invocation) throws Throwable {
         final Secured secured = invocation.getMethod().getAnnotation(Secured.class);
         final SecurityUser user = securityScope.get();
 
         if (user == null) {
+            audit.failed(null, secured, invocation.getMethod(), invocation.getArguments());
             throw new NotLogginException();
         }
 
         final SecurityDecisionMaker decisionMaker = injector.getInstance(secured.decisionMaker());
 
         if (decisionMaker.hasAccessTo(user, secured, invocation)) {
+            audit.granted(user, secured, invocation.getMethod(), invocation.getArguments());
             return invocation.proceed();
         }
 
+        audit.failed(user, secured, invocation.getMethod(), invocation.getArguments());
         throw new NotInRoleException(invocation.getMethod().toString(), toStringList(secured));
     }
 
