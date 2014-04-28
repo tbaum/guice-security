@@ -108,7 +108,7 @@ public class SecurityTokenServiceImpl implements SecurityTokenService {
     /**
      * create a new token based on current time and passed user parameter
      *
-     * @param user
+     * @param user username
      * @return a base64 string containing, 24 byte[] bcrypt signature, 1 Long timestamp, user-string
      */
     public String createToken(String user) {

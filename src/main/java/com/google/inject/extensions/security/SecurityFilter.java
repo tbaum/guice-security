@@ -1,8 +1,9 @@
 package com.google.inject.extensions.security;
 
-import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -23,27 +24,38 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
  */
 @Singleton public class SecurityFilter implements Filter {
 
+    public static final String INJECTOR = SecurityFilter.class.getCanonicalName();
     public static final String HEADER_NAME = "X-Authorization";
     private static final String SESSION_TOKEN = "_SECURITY_UUID";
     private static final String PARAMETER_NAME = "_SECURITY_UUID";
     private static final String COOKIE_NAME = "_SECURITY_UUID";
     private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
     private final ThreadLocal<HttpServletResponse> currentResponse = new ThreadLocal<>();
-    private final SecurityService securityService;
-    private final RoleConverter roleConverter;
-    private final UserService userService;
-    private final SecurityAudit audit;
+    private final boolean useInit;
+    @Inject private SecurityService securityService;
+    @Inject private RoleConverter roleConverter;
+    @Inject private UserService userService;
+    @Inject private SecurityAudit audit;
+
+    public SecurityFilter() {
+        useInit = true;
+    }
 
     @Inject
     public SecurityFilter(SecurityService securityService, RoleConverter roleConverter, UserService userService,
                           SecurityAudit audit) {
+        useInit = false;
         this.securityService = securityService;
         this.roleConverter = roleConverter;
         this.userService = userService;
         this.audit = audit;
     }
 
-    @Override public void init(final FilterConfig filterConfig) throws ServletException {
+    @Override
+    public void init(FilterConfig config) {
+        if (useInit) {
+            ((Injector) config.getServletContext().getAttribute(INJECTOR)).injectMembers(this);
+        }
     }
 
     @Override @SecurityScoped
