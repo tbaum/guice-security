@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Singleton public class LogoutServlet extends HttpServlet {
 
-    private final SecurityFilter securityFilter;
+    private final GuiceSecurityFilter securityFilter;
 
-    @Inject public LogoutServlet(final SecurityFilter securityFilter) {
+    @Inject public LogoutServlet(final GuiceSecurityFilter securityFilter) {
         this.securityFilter = securityFilter;
     }
 
