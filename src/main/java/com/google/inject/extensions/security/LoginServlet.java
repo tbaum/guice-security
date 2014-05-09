@@ -13,12 +13,12 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Singleton public class LoginServlet extends HttpServlet {
 
-    private final SecurityFilter securityFilter;
+    private final GuiceSecurityFilter securityFilter;
     private final SecurityService securityService;
     private final UserService userService;
 
     @Inject
-    public LoginServlet(final SecurityFilter securityFilter, SecurityService securityService, UserService userService) {
+    public LoginServlet(final GuiceSecurityFilter securityFilter, SecurityService securityService, UserService userService) {
         this.securityFilter = securityFilter;
         this.securityService = securityService;
         this.userService = userService;

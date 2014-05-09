@@ -1,11 +1,12 @@
 package com.google.inject.extensions.security;
 
-import com.google.inject.Inject;
-
+import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.inject.extensions.security.SecurityFilter.HEADER_NAME;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -25,18 +26,28 @@ public class SecurityEndpoint {
     }
 
     @POST @Path("/login") @Consumes(APPLICATION_FORM_URLENCODED)
-    public String login(@FormParam("login") String login, @FormParam("password") String password) {
+    public Response login(@FormParam("login") String login, @FormParam("password") String password) {
         SecurityUser user = userService.findUser(login, password);
-        return user == null ? null : securityService.authenticate(user);
+        if (user == null) return Response.status(500).build();
+
+        String token = securityService.authenticate(user);
+        return Response
+                .ok(token)
+                .header(HEADER_NAME, token)
+                .build();
     }
 
     @POST @Path("/login") @Consumes(APPLICATION_JSON)
-    public Map<String, String> login(Map<String, String> data) {
+    public Response login(Map<String, String> data) {
         SecurityUser user = userService.findUser(data.get("login"), data.get("password"));
         if (user == null) {
             throw new RuntimeException("unable to authenticate");
         }
-        return getResult(securityService.authenticate(user), user.getLogin());
+        String token = securityService.authenticate(user);
+        return Response
+                .ok(getResult(token, user.getLogin()))
+                .header(HEADER_NAME, token)
+                .build();
     }
 
     private Map<String, String> getResult(String authenticate, String login) {
