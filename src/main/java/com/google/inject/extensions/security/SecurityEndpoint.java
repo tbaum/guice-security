@@ -1,7 +1,13 @@
 package com.google.inject.extensions.security;
 
+import com.google.inject.extensions.security.filter.FromHeader;
+import com.google.inject.extensions.security.filter.FromSession;
+
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,18 +25,27 @@ public class SecurityEndpoint {
 
     private final SecurityService securityService;
     private final UserService userService;
+    private final FromSession authSession;
+    private final FromHeader authHeader;
 
-    @Inject public SecurityEndpoint(SecurityService securityService, UserService userService) {
+    @Inject public SecurityEndpoint(SecurityService securityService, UserService userService, FromSession authSession,
+                                    FromHeader authHeader) {
         this.securityService = securityService;
         this.userService = userService;
+        this.authSession = authSession;
+        this.authHeader = authHeader;
     }
 
     @POST @Path("/login") @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response login(@FormParam("login") String login, @FormParam("password") String password) {
+    public Response login(@Context HttpServletRequest request, @Context HttpServletResponse response,
+                          @FormParam("login") String login, @FormParam("password") String password) {
         SecurityUser user = userService.findUser(login, password);
         if (user == null) return Response.status(500).build();
 
         String token = securityService.authenticate(user);
+        authSession.postAuth(request, response);
+        authHeader.postAuth(request, response);
+
         return Response
                 .ok(token)
                 .header(HEADER_NAME, token)
@@ -38,12 +53,16 @@ public class SecurityEndpoint {
     }
 
     @POST @Path("/login") @Consumes(APPLICATION_JSON)
-    public Response login(Map<String, String> data) {
+    public Response login(@Context HttpServletRequest request, @Context HttpServletResponse response,
+                          Map<String, String> data) {
         SecurityUser user = userService.findUser(data.get("login"), data.get("password"));
         if (user == null) {
             throw new RuntimeException("unable to authenticate");
         }
         String token = securityService.authenticate(user);
+        authSession.postAuth(request, response);
+        authHeader.postAuth(request, response);
+
         return Response
                 .ok(getResult(token, user.getLogin()))
                 .header(HEADER_NAME, token)
@@ -58,8 +77,10 @@ public class SecurityEndpoint {
         return result;
     }
 
-    @POST @Path("/logout") public void logout() {
+    @POST @Path("/logout")
+    public void logout(@Context HttpServletRequest request, @Context HttpServletResponse response) {
         securityService.clearAuthentication();
+        authSession.postAuth(request, response);
     }
 
     @GET @Path("/check") @Secured

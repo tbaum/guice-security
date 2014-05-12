@@ -9,6 +9,16 @@ public class ClassHelper {
 
     private static final Map<Class<? extends SecurityRole>, Set<Class<? extends SecurityRole>>> cache = new HashMap<>();
 
+    public static Set<Class<? extends SecurityRole>> resolveAll(Set<Class<? extends SecurityRole>> roles) {
+        Set<Class<? extends SecurityRole>> allRoles = new HashSet<>();
+        if (roles != null) {
+            for (Class<? extends SecurityRole> role : roles) {
+                allRoles.addAll(resolveAll(role));
+            }
+        }
+        return allRoles;
+    }
+
     public static Set<Class<? extends SecurityRole>> resolveAll(Class<? extends SecurityRole> aClass) {
         if (cache.containsKey(aClass)) return cache.get(aClass);
 
