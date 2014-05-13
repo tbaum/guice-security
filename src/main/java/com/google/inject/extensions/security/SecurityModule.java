@@ -24,6 +24,8 @@ public abstract class SecurityModule extends AbstractModule {
         bindInterceptor(any(), annotatedWith(SecurityScoped.class), new SecurityScopedInterceptor(securityScope));
 
         bindFilters();
+        bind(FromSession.class);
+        bind(FromHeader.class);
         configureSecurity();
     }
 
