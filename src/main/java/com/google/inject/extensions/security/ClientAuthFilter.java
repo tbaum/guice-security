@@ -18,10 +18,14 @@ public final class ClientAuthFilter implements ClientRequestFilter, ClientRespon
     private final WebTarget resource;
     private String token;
 
-    public ClientAuthFilter(String username, String password, WebTarget resource) {
+    public ClientAuthFilter(String username, String password, WebTarget resource, String authPath) {
         this.username = username;
         this.password = password;
-        this.resource = resource.path("/api/auth/login");
+        this.resource = resource.path(authPath);
+    }
+
+    public ClientAuthFilter(String username, String password, WebTarget resource) {
+        this(username, password, resource, "/api/auth/login");
     }
 
     static boolean repeatRequest(ClientRequestContext request, ClientResponseContext response, String newToken) {
