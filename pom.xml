@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.google.code.guice-security</groupId>
     <artifactId>guice-security</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.6</version>
     <packaging>jar</packaging>
     <name>guice-security</name>
 
@@ -54,7 +54,7 @@
         -->
         <connection>scm:git:git@github.com:tbaum/guice-security.git</connection>
         <url>scm:git:git@github.com:tbaum/guice-security.git</url>
-        <tag>HEAD</tag>
+        <tag>guice-security-1.0.6</tag>
     </scm>
 
     <dependencies>
