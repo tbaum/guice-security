@@ -41,7 +41,9 @@ public class SecurityAuditImpl implements SecurityAudit {
         if (request == null) {
             LOG.error("request not set");
         } else {
-            LOG.info("request: {} {}", request.getRequestURI(), request.getRemoteHost());
+            String remoteHost = request.getRemoteHost();
+            String remoteHostHeader = request.getHeader("X-Real-IP");
+            LOG.info("request: {} {} {}", request.getRequestURI(), remoteHost, remoteHostHeader);
         }
     }
 
