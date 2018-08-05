@@ -1,11 +1,14 @@
 package com.google.inject.extensions.security.jersey;
 
+import org.glassfish.hk2.api.InterceptionService;
 import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import static com.google.inject.extensions.security.jersey.TestContextListener.injector;
 import static org.jvnet.hk2.guice.bridge.api.GuiceBridge.getGuiceBridge;
@@ -25,7 +28,6 @@ public class TestApplication extends ResourceConfig {
         register(JacksonFeature.class);
 
         packages(getClass().getPackage().getName());
+        register(new SecurityBinder());
     }
-
 }
-

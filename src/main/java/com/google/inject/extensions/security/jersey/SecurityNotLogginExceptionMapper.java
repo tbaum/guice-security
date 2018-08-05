@@ -15,14 +15,15 @@ import static javax.ws.rs.core.Response.status;
  * @author tbaum
  * @since 19.03.2014
  */
-@Provider @Singleton
+@Provider
+@Singleton
 public class SecurityNotLogginExceptionMapper implements ExceptionMapper<NotLogginException> {
 
     private final Logger LOG = LoggerFactory.getLogger(SecurityNotLogginExceptionMapper.class);
 
     @Override
     public Response toResponse(NotLogginException exception) {
-        LOG.warn(exception.getMessage(), exception);
+        LOG.debug(exception.getMessage());
         return status(401).build();
     }
 }

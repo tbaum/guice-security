@@ -15,14 +15,15 @@ import static javax.ws.rs.core.Response.status;
  * @author tbaum
  * @since 19.03.2014
  */
-@Provider @Singleton
+@Provider
+@Singleton
 public class SecurityNotInRoleExceptionMapper implements ExceptionMapper<NotInRoleException> {
 
     private final Logger LOG = LoggerFactory.getLogger(SecurityNotInRoleExceptionMapper.class);
 
     @Override
     public Response toResponse(NotInRoleException exception) {
-        LOG.warn(exception.getMessage(), exception);
+        LOG.debug(exception.getMessage());
         return status(403).build();
     }
 }

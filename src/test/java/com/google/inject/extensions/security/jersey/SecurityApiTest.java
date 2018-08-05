@@ -77,7 +77,7 @@ public class SecurityApiTest {
                     put("password", "fooo");
                 }}, APPLICATION_JSON_TYPE));
 
-        assertEquals(500, response.getStatus());
+        assertEquals(401, response.getStatus());
         assertThat(response.readEntity(String.class), containsString("unable to authenticate"));
     }
 

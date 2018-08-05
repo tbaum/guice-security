@@ -1,9 +1,8 @@
 package com.google.inject.extensions.security.filter;
 
 import com.google.inject.BindingAnnotation;
-import com.google.inject.extensions.security.SecurityFilter;
-import com.google.inject.extensions.security.SecurityService;
-import com.google.inject.extensions.security.SecurityUser;
+import com.google.inject.extensions.security.*;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +12,7 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author tbaum
@@ -22,6 +22,7 @@ public class FromHeader implements AuthFilterPlugin {
 
     private final boolean sendTokenInResponse;
     private final SecurityService securityService;
+    private static final Logger LOG = getLogger(FromHeader.class);
 
     @Inject public FromHeader(@SendTokenInResponse boolean sendTokenInResponse, SecurityService securityService) {
         this.sendTokenInResponse = sendTokenInResponse;
@@ -30,8 +31,13 @@ public class FromHeader implements AuthFilterPlugin {
 
 
     public boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
-        String token = request.getHeader(SecurityFilter.HEADER_NAME);
-        return token != null && !token.isEmpty() && this.securityService.authenticate(token) != null;
+        try {
+            String token = request.getHeader(SecurityFilter.HEADER_NAME);
+            return token != null && !token.isEmpty() && this.securityService.authenticate(token) != null;
+        } catch (InvalidTokenException e) {
+            LOG.warn(e.getMessage());
+            return false;
+        }
     }
 
     public void postAuth(HttpServletRequest request, HttpServletResponse response) {

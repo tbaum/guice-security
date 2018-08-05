@@ -7,15 +7,16 @@ import com.google.inject.extensions.security.SecurityFilter;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;
-import org.apache.catalina.deploy.FilterDef;
-import org.apache.catalina.deploy.FilterMap;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
 
 import static org.apache.catalina.startup.Tomcat.addServlet;
+import static org.glassfish.jersey.servlet.ServletProperties.JAXRS_APPLICATION_CLASS;
 
 /**
  * @author tbaum
@@ -23,52 +24,52 @@ import static org.apache.catalina.startup.Tomcat.addServlet;
  */
 public class TomcatGuiceBerryEnvMain extends AbstractModule implements GuiceBerryEnvMain {
 
-    public static final int SERVER_PORT = 18456;
-    public static final String BASE_URI = "http://localhost:" + SERVER_PORT;
-    @Inject Injector injector;
-    @Inject Tomcat tomcat;
+    public static int SERVER_PORT = 0;
+    public static String BASE_URI = null;
+    @Inject
+    private Injector injector;
+    @Inject
+    private Tomcat tomcat;
 
-    @Override public void run() {
+    @Override
+    public void run() {
+        Context context = tomcat.addContext("", null);
+        Wrapper wrapper = addServlet(context, TestApplication.class.getName(), ServletContainer.class.getName());
+        wrapper.addInitParameter(JAXRS_APPLICATION_CLASS, TestApplication.class.getName());
+        wrapper.setAsyncSupported(true);
+        wrapper.setLoadOnStartup(1);
+
+        context.addServletMappingDecoded("/api/*", wrapper.getName());
+        context.addApplicationListener(TestContextListener.class.getName());
+
+        TestContextListener.injector = injector;
+
+        context.addFilterDef(new FilterDef() {{
+            setFilterName("SecurityFilter");
+            setFilter(injector.getInstance(SecurityFilter.class));
+            setAsyncSupported("true");
+        }});
+
+        context.addFilterMap(new FilterMap() {{
+            addURLPattern("/*");
+            setFilterName("SecurityFilter");
+        }});
         try {
-            File tempFile = File.createTempFile("tomcat-test", "tmp");
-            tempFile.delete();
-            tempFile.mkdirs();
-            String baseDir = tempFile.getCanonicalPath();
-
-            Context rootCtx = tomcat.addContext("", baseDir);
-
-            Wrapper wrapper = addServlet(rootCtx, TestApplication.class.getName(),
-                    "org.glassfish.jersey.servlet.ServletContainer");
-            wrapper.addInitParameter("javax.ws.rs.Application", TestApplication.class.getName());
-            wrapper.setAsyncSupported(true);
-            wrapper.setLoadOnStartup(1);
-
-            rootCtx.addServletMapping("/api/*", wrapper.getName());
-            rootCtx.addApplicationListener(TestContextListener.class.getName());
-
-            TestContextListener.injector = injector;
-
-            FilterDef filterDef = new FilterDef();
-            filterDef.setFilterName("SecurityFilter");
-            filterDef.setFilter(injector.getInstance(SecurityFilter.class));
-            filterDef.setAsyncSupported("true");
-            rootCtx.addFilterDef(filterDef);
-
-            FilterMap filterMap = new FilterMap();
-            filterMap.addURLPattern("/*");
-            filterMap.setFilterName("SecurityFilter");
-            rootCtx.addFilterMap(filterMap);
-
-
             tomcat.start();
-        } catch (IOException | LifecycleException e) {
+        } catch (LifecycleException e) {
             throw new RuntimeException(e);
         }
+        Connector connector = tomcat.getConnector();
+        SERVER_PORT = connector.getLocalPort();
+        BASE_URI = "http://localhost:" + SERVER_PORT;
     }
 
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(SERVER_PORT);
+        tomcat.setBaseDir("target/tomcat");
+        tomcat.setHostname("localhost");
         bind(Tomcat.class).toInstance(tomcat);
         bind(GuiceBerryEnvMain.class).to(TomcatGuiceBerryEnvMain.class);
     }

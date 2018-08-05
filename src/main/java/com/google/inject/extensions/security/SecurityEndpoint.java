@@ -57,7 +57,7 @@ public class SecurityEndpoint {
                           Map<String, String> data) {
         SecurityUser user = userService.findUser(data.get("login"), data.get("password"));
         if (user == null) {
-            throw new RuntimeException("unable to authenticate");
+            return Response.status(401,"unable to authenticate").build();
         }
         String token = securityService.authenticate(user);
         authSession.postAuth(request, response);
