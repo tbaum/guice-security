@@ -11,27 +11,23 @@ import static java.util.Arrays.asList;
  */
 public class SimpleUser implements SecurityUser {
     private final Set<Class<? extends SecurityRole>> roles;
-    private final String login;
-    private String token;
+    private final String username;
+   // private String token;
 
-    @SafeVarargs public SimpleUser(String login, Class<? extends SecurityRole>... roles) {
+    @SafeVarargs public SimpleUser(String username, Class<? extends SecurityRole>... roles) {
         this.roles = new HashSet<>(asList(roles));
-        this.login = login;
+        this.username = username;
     }
 
-    @Override public String getLogin() {
-        return login;
+    @Override public String getUsername() {
+        return username;
     }
 
     @Override public Set<Class<? extends SecurityRole>> getRoles() {
         return roles;
     }
 
-    @Override public String getToken() {
-        return token;
-    }
-
-    @Override public void setToken(String token) {
-        this.token = token;
-    }
+  //  @Override public String getToken() {
+  //      return token;
+  //  }
 }

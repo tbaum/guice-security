@@ -35,7 +35,7 @@ public class SecurityTestResource {
     @GET @Secured @Path("secured") @Produces(APPLICATION_JSON)
     public Map<String, Object> secured() {
         return new HashMap<String, Object>() {{
-            put("user", s.currentUser().getLogin());
+            put("user", s.currentUser().getUsername());
         }};
     }
 }

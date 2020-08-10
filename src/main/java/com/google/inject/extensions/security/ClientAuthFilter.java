@@ -1,5 +1,7 @@
 package com.google.inject.extensions.security;
 
+import com.google.inject.extensions.security.SecurityEndpoint.LoginResponse;
+
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -10,6 +12,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 public final class ClientAuthFilter implements ClientRequestFilter, ClientResponseFilter {
 
@@ -38,13 +42,13 @@ public final class ClientAuthFilter implements ClientRequestFilter, ClientRespon
         Invocation.Builder builder = resourceTarget.request(mediaType);
         MultivaluedMap<String, Object> newHeaders = new MultivaluedHashMap<>();
         for (Map.Entry<String, List<Object>> entry : request.getHeaders().entrySet()) {
-            if (SecurityFilter.HEADER_NAME.equals(entry.getKey())) {
+            if (GuiceSecurityFilter.HEADER_NAME.equals(entry.getKey())) {
                 continue;
             }
             newHeaders.put(entry.getKey(), entry.getValue());
         }
 
-        newHeaders.add(SecurityFilter.HEADER_NAME, newToken);
+        newHeaders.add(GuiceSecurityFilter.HEADER_NAME, newToken);
         builder.headers(newHeaders);
 
         Invocation invocation;
@@ -68,37 +72,31 @@ public final class ClientAuthFilter implements ClientRequestFilter, ClientRespon
         return response.getStatus() != Response.Status.UNAUTHORIZED.getStatusCode();
     }
 
-    private void addAuthHeader(ClientRequestContext cr) {
-        if (token == null) {
-            token = fetchToken();
-        }
-        cr.getHeaders().add(SecurityFilter.HEADER_NAME, token);
-    }
-
     private String fetchToken() {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
-        params.add("login", username);
-        params.add("password", password);
-        return resource.request().post(Entity.form(params), String.class);
+        return resource.request(APPLICATION_JSON_TYPE)
+                .post(Entity.json(new SecurityEndpoint.LoginRequest(username, password)), LoginResponse.class).token;
     }
 
     private void invalidateToken() {
         token = null;
     }
 
-    @Override public void filter(ClientRequestContext requestContext) throws IOException {
+    @Override
+    public void filter(ClientRequestContext requestContext) {
         if (token == null) {
             token = fetchToken();
         }
 
-        requestContext.getHeaders().add(SecurityFilter.HEADER_NAME, token);
+        requestContext.getHeaders().add(GuiceSecurityFilter.HEADER_NAME, GuiceSecurityFilter.BEARER_PREFIX + " " + token);
     }
 
-    @Override public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
+    @Override
+    public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
         int status = responseContext.getStatus();
         if (status == 401 || status == 403) {
             invalidateToken();
-            addAuthHeader(requestContext);
+            filter(requestContext);
+//            addAuthHeader(requestContext);
             repeatRequest(requestContext, responseContext, token);
         }
     }

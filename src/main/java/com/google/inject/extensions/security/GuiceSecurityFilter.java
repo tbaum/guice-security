@@ -1,7 +1,7 @@
 package com.google.inject.extensions.security;
 
 import com.google.inject.Singleton;
-import com.google.inject.extensions.security.filter.AuthFilterPlugin;
+import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,9 +12,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
-import java.util.*;
 
 /**
  * @author mwolter
@@ -22,40 +20,42 @@ import java.util.*;
  */
 @Singleton
 public class GuiceSecurityFilter {
+    public static final String HEADER_NAME = "Authorization";
+    public static final String BEARER_PREFIX = "Bearer ";
     private static final Logger LOG = LoggerFactory.getLogger(GuiceSecurityFilter.class);
     private final SecurityService securityService;
     private final SecurityAudit audit;
-    private final Set<AuthFilterPlugin> filters;
+    private final SecurityTokenService securityTokenService;
 
-    @Inject public GuiceSecurityFilter(SecurityService securityService, SecurityAudit audit, Set<AuthFilterPlugin> filters) {
+    @Inject
+    public GuiceSecurityFilter(SecurityService securityService, SecurityAudit audit, SecurityTokenService securityTokenService) {
         this.securityService = securityService;
         this.audit = audit;
-        this.filters = filters;
+        this.securityTokenService = securityTokenService;
     }
 
-    @SecurityScoped void handleFilter(ServletRequest rq, ServletResponse rp, FilterChain chain) throws IOException, ServletException {
+
+    @SecurityScoped
+    void handleFilter(ServletRequest rq, ServletResponse rp, FilterChain chain) throws IOException, ServletException {
         try {
             final HttpServletRequest request = (HttpServletRequest) rq;
-            final HttpServletResponseHeaderWrapper response = new HttpServletResponseHeaderWrapper(rp);
+            HttpServletResponse response = (HttpServletResponse) rp;
 
             audit.startRequest(request, response);
 
-            for (AuthFilterPlugin ca : filters) {
-                try {
-                    if (ca.authenticate(request, response)) break;
-                } catch (Exception e) {
-                    LOG.warn("should not happen: {}", e.getMessage(), e);
-                    securityService.clearAuthentication();
-                }
-            }
-
-            for (AuthFilterPlugin filter : filters) {
-                filter.postAuth(request, response);
-            }
-
-            response.flushHeaders();
             try {
-                chain.doFilter(rq, rp);
+                String header = request.getHeader(HEADER_NAME);
+                if (header != null && header.startsWith(BEARER_PREFIX)) {
+                    String token = header.substring(BEARER_PREFIX.length());
+                    SecurityTokenService.ParsedToken user = securityTokenService.validateToken(token);
+                    securityService.authenticate(user);
+                }
+            } catch (JwtException e1) {
+                LOG.warn(e1.getMessage(), e1);
+            }
+
+            try {
+                chain.doFilter(request, response);
             } catch (NotLogginException e) {
                 response.setStatus(401);
             } catch (NotInRoleException e) {
@@ -63,43 +63,6 @@ public class GuiceSecurityFilter {
             }
         } finally {
             audit.finishRequest();
-        }
-    }
-
-    private static class HttpServletResponseHeaderWrapper extends HttpServletResponseWrapper {
-        private final Map<String, List<String>> headers = new HashMap<>();
-        private final HttpServletResponse response;
-
-        public HttpServletResponseHeaderWrapper(ServletResponse response) {
-            this((HttpServletResponse) response);
-        }
-
-        public HttpServletResponseHeaderWrapper(HttpServletResponse response) {
-            super(response);
-            this.response = response;
-        }
-
-        void flushHeaders() {
-            for (Map.Entry<String, List<String>> header : headers.entrySet()) {
-                for (String value : header.getValue()) {
-                    response.addHeader(header.getKey(), value);
-                }
-            }
-        }
-
-        @Override public void setHeader(String name, String value) {
-            headers.remove(name);
-            if (value != null) addHeader(name, value);
-        }
-
-        @Override public void addHeader(String name, String value) {
-            List<String> values;
-            if (headers.containsKey(name)) {
-                values = headers.get(name);
-            } else {
-                headers.put(name, values = new ArrayList<>());
-            }
-            values.add(value);
         }
     }
 }

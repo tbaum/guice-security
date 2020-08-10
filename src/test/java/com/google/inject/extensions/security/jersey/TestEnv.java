@@ -4,9 +4,12 @@ import com.google.guiceberry.GuiceBerryModule;
 import com.google.inject.Scopes;
 import com.google.inject.extensions.security.*;
 
-import java.util.Iterator;
+import javax.crypto.SecretKey;
+import java.util.HashMap;
+import java.util.Map;
 
-import static java.util.concurrent.TimeUnit.DAYS;
+import static io.jsonwebtoken.SignatureAlgorithm.HS512;
+import static io.jsonwebtoken.security.Keys.secretKeyFor;
 import static java.util.concurrent.TimeUnit.HOURS;
 
 /**
@@ -14,6 +17,7 @@ import static java.util.concurrent.TimeUnit.HOURS;
  * @since 16.03.2014
  */
 public class TestEnv extends GuiceBerryModule {
+    public static final SecretKey JWS_KEY = secretKeyFor(HS512);
 
     @Override
     protected void configure() {
@@ -22,31 +26,21 @@ public class TestEnv extends GuiceBerryModule {
 
             @Override protected void configureSecurity() {
                 bind(SecurityInterceptor.class).in(Scopes.SINGLETON);
-                bind(RoleConverter.class).toInstance(new MyRoleConverter());
-
-                bind(SecurityTokenService.class).toInstance(
-                        new SecurityTokenServiceImpl(HOURS.toMillis(1), DAYS.toMillis(14),
-                                "asdfghdsffadsdffafjkhgfds", 8)
-                );
+                RoleConverter roleConverter = new AbstractRoleConverter() {
+                    @Override protected Map<String, Class<? extends SecurityRole>> allRoles() {
+                        HashMap<String, Class<? extends SecurityRole>> r = new HashMap<>();
+                        r.put("ROLE1", UserServiceImpl.SpecialRole.class);
+                        return r;
+                    }
+                };
+                bind(RoleConverter.class).toInstance(roleConverter);
+                bind(SecurityTokenService.class).toInstance(new SecurityTokenServiceImpl(
+                        JWS_KEY, HOURS.toMillis(1), roleConverter));
                 bind(UserService.class).to(UserServiceImpl.class);
 
             }
         });
 
         install(new TomcatGuiceBerryEnvMain());
-    }
-
-    private static class MyRoleConverter implements RoleConverter {
-        @Override public Iterator<String> iterator() {
-            return null;
-        }
-
-        @Override public Class<? extends SecurityRole> toRole(String role) {
-            return null;
-        }
-
-        @Override public String toString(Class<? extends SecurityRole> role) {
-            return null;
-        }
     }
 }

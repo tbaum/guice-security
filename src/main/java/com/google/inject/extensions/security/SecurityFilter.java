@@ -1,9 +1,9 @@
 package com.google.inject.extensions.security;
 
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.*;
 import java.io.IOException;
 
@@ -15,10 +15,11 @@ import java.io.IOException;
 public class SecurityFilter implements Filter {
 
     public static final String INJECTOR = SecurityFilter.class.getCanonicalName();
-    public static final String HEADER_NAME = "X-Authorization";
+    //    public static final String HEADER_NAME = "X-Authorization";
     private final boolean useInit;
 
-    @Inject private GuiceSecurityFilter guiceSecurityFilter;
+    @Inject
+    private GuiceSecurityFilter guiceSecurityFilter;
 
     @Inject
     public SecurityFilter(GuiceSecurityFilter guiceSecurityFilter) {
@@ -34,7 +35,9 @@ public class SecurityFilter implements Filter {
     @Override
     public void init(FilterConfig config) {
         if (useInit) {
-            ((Injector) config.getServletContext().getAttribute(INJECTOR)).injectMembers(this);
+            ServletContext context = config.getServletContext();
+            Injector injector = (Injector) context.getAttribute(INJECTOR);
+            injector.injectMembers(this);
         }
     }
 
@@ -44,6 +47,7 @@ public class SecurityFilter implements Filter {
         guiceSecurityFilter.handleFilter(request, response, chain);
     }
 
-    @Override public void destroy() {
+    @Override
+    public void destroy() {
     }
 }

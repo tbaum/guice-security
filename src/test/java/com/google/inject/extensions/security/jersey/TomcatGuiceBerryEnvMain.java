@@ -27,9 +27,9 @@ public class TomcatGuiceBerryEnvMain extends AbstractModule implements GuiceBerr
     public static int SERVER_PORT = 0;
     public static String BASE_URI = null;
     @Inject
-    private Injector injector;
+    Injector injector;
     @Inject
-    private Tomcat tomcat;
+    Tomcat tomcat;
 
     @Override
     public void run() {

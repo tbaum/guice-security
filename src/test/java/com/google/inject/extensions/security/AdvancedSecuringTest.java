@@ -48,8 +48,7 @@ public class AdvancedSecuringTest {
     public static class A {
 
         @Secured(decisionMaker = SpecialDecisionMaker.class)
-        protected boolean anyRole(String name) {
-            return true;
+        protected void anyRole(String name) {
         }
     }
 

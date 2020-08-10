@@ -2,7 +2,6 @@ package com.google.inject.extensions.security;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.extensions.security.filter.*;
 
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
@@ -24,25 +23,26 @@ public abstract class SecurityModule extends AbstractModule {
         bindInterceptor(any(), annotatedWith(SecurityScoped.class), new SecurityScopedInterceptor(securityScope));
 
         bindFilters();
-        bind(FromSession.class);
-        bind(FromHeader.class);
+//        bind(FromSession.class);
+//        bind(FromHeader.class);
         configureSecurity();
     }
 
     protected void bindFilters() {
-        bindConstant().annotatedWith(FromHeader.SendTokenInResponse.class).to(true);
+//        bindConstant().annotatedWith(FromHeader.SendTokenInResponse.class).to(true);
 
-        bindAuthFilterPlugin(FromHeader.class);
-        bindAuthFilterPlugin(FromParameter.class);
-        bindAuthFilterPlugin(HttpBasicAuth.class);
-        bindAuthFilterPlugin(FromSession.class);
-        bindAuthFilterPlugin(FromCookie.class);
-        bindAuthFilterPlugin(AddDetails.class);
+//        bindAuthFilterPlugin(FromHeader.class);
+//        bindAuthFilterPlugin(FromParameter.class);
+      //  bindAuthFilterPlugin(HttpBasicAuth.class);
+     //   bindAuthFilterPlugin(HttpBearerAuth.class);
+//        bindAuthFilterPlugin(FromSession.class);
+//        bindAuthFilterPlugin(FromCookie.class);
+     //   bindAuthFilterPlugin(AddDetails.class);
     }
 
-    protected ScopedBindingBuilder bindAuthFilterPlugin(Class<? extends AuthFilterPlugin> implementation) {
-        return newSetBinder(binder(), AuthFilterPlugin.class).addBinding().to(implementation);
-    }
+  //  protected ScopedBindingBuilder bindAuthFilterPlugin(Class<? extends AuthFilterPlugin> implementation) {
+   //     return newSetBinder(binder(), AuthFilterPlugin.class).addBinding().to(implementation);
+   // }
 
     protected abstract void configureSecurity();
 }

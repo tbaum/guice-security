@@ -8,11 +8,10 @@ import java.util.Set;
  */
 public interface SecurityUser {
 
-    String getLogin();
+    String getUsername();
 
     Set<Class<? extends SecurityRole>> getRoles();
 
-    String getToken();
+  //  String getToken();
 
-    void setToken(String token);
 }

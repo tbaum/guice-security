@@ -11,9 +11,9 @@ public interface SecurityService {
 
     SecurityUser currentUser();
 
-    String authenticate(String securityToken);
+//    String authenticate(String securityToken);
 
-    String authenticate(SecurityUser securityUser);
+    void authenticate(SecurityUser securityUser);
 
-    SecurityUser clearAuthentication();
+//    SecurityUser clearAuthentication();
 }

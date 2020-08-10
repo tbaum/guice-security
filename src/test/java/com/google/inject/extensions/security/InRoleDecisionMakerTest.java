@@ -47,7 +47,7 @@ public class InRoleDecisionMakerTest {
     @SuppressWarnings("ClassExplicitlyAnnotation")
     private static class TestSecured implements Secured {
 
-        private Class<? extends SecurityRole>[] roles;
+        private final Class<? extends SecurityRole>[] roles;
 
         @SafeVarargs private TestSecured(Class<? extends SecurityRole>... roles) {
             this.roles = roles;

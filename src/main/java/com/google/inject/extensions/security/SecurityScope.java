@@ -17,27 +17,31 @@ public class SecurityScope implements Scope, AutoCloseable {
     public static final Key<SecurityUser> KEY = Key.get(SecurityUser.class);
     private final ThreadLocal<Map<Key<?>, Object>> values = new ThreadLocal<>();
 
-    @Override public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
-        return new Provider<T>() {
-            @Override public T get() {
-                final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
+    public SecurityScope() {
+        System.err.println("EEE NEW   " + this.hashCode());
 
-                @SuppressWarnings("unchecked")
-                T current = (T) scopedObjects.get(key);
-                if (current == null && !scopedObjects.containsKey(key)) {
-                    current = unscoped.get();
-                    scopedObjects.put(key, current);
-                }
-                return current;
+    }
+
+    @Override public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
+        return () -> {
+            final Map<Key<?>, Object> scopedObjects = getScopedObjectMap(key);
+
+            @SuppressWarnings("unchecked")
+            T current = (T) scopedObjects.get(key);
+            if (current == null && !scopedObjects.containsKey(key)) {
+                current = unscoped.get();
+                scopedObjects.put(key, current);
             }
+            return current;
         };
     }
 
     public SecurityScope enter() {
+        System.err.println("EEE ENTER " + this.hashCode());
         if (inScope()) {
             throw new IllegalStateException("already in a security-scope block");
         }
-        values.set(new HashMap<Key<?>, Object>());
+        values.set(new HashMap<>());
         return this;
     }
 
@@ -46,6 +50,8 @@ public class SecurityScope implements Scope, AutoCloseable {
     }
 
     public void exit() {
+        System.err.println("EEE EXIT  " + this.hashCode());
+
         if (!inScope()) {
             throw new IllegalStateException("outside of a security-scope block");
         }

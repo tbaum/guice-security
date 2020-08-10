@@ -29,30 +29,37 @@ public class UserServiceImpl implements UserService {
         return user.password.equals(password) ? user : null;
     }
 
+    public interface SpecialRole extends SecurityRole {
+
+    }
+
     private static class SecurityUserImpl implements SecurityUser {
         private final String login;
         private final String password;
-        private String token;
+        //  private String token;
 
         public SecurityUserImpl(String login, String password) {
             this.login = login;
             this.password = password;
         }
 
-        @Override public String getLogin() {
+        @Override public String getUsername() {
             return login;
         }
 
         @Override public Set<Class<? extends SecurityRole>> getRoles() {
-            return new HashSet<>();
+            HashSet<Class<? extends SecurityRole>> classes = new HashSet<>();
+            classes.add(SpecialRole.class);
+            return classes;
         }
 
-        @Override public String getToken() {
-            return token;
-        }
 
-        @Override public void setToken(String token) {
-            this.token = token;
-        }
+        //   @Override public String getToken() {
+        //       return token;
+        //   }
+
+        //  @Override public void setToken(String token) {
+        //      this.token = token;
+        //  }
     }
 }

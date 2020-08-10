@@ -28,7 +28,7 @@ public class SecurityAuditImpl implements SecurityAudit {
     @Override public void failed(SecurityUser user, Secured secured, Method method, Object... arguments) {
         logFirstRequestUri();
         LOG.warn("denied {} access to {}::{} args {}",
-                user != null ? user.getLogin() : "-",
+                user != null ? user.getUsername() : "-",
                 method.getDeclaringClass().getCanonicalName(), method.getName(), Arrays.toString(arguments));
 
     }
@@ -50,7 +50,7 @@ public class SecurityAuditImpl implements SecurityAudit {
     @Override public void granted(SecurityUser user, Secured secured, Method method, Object... arguments) {
         logFirstRequestUri();
         LOG.info("granted {} access to {}::{} args {}",
-                user != null ? user.getLogin() : "-",
+                user != null ? user.getUsername() : "-",
                 method.getDeclaringClass().getCanonicalName(), method.getName(), Arrays.toString(arguments));
     }
 

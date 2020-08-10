@@ -27,7 +27,7 @@ public class SecurityInterceptionService implements InterceptionService {
 
     @Inject
     public SecurityInterceptionService(SecurityInterceptor securityInterceptor) {
-        interceptor = singletonList((MethodInterceptor) securityInterceptor);
+        interceptor = singletonList(securityInterceptor);
     }
 
     public Filter getDescriptorFilter() {

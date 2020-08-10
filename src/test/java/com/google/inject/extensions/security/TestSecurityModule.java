@@ -1,9 +1,11 @@
 package com.google.inject.extensions.security;
 
+import javax.crypto.SecretKey;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.inject.extensions.security.SecurityTokenServiceImpl.createSalt;
+import static io.jsonwebtoken.SignatureAlgorithm.HS512;
+import static io.jsonwebtoken.security.Keys.secretKeyFor;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
@@ -11,18 +13,21 @@ import static java.util.concurrent.TimeUnit.MINUTES;
  * @since 23.12.2013
  */
 class TestSecurityModule extends SecurityModule {
-    private static final String TEST_SALT = createSalt();
+    public static final SecretKey JWS_KEY = secretKeyFor(HS512);
 
     @Override protected void configureSecurity() {
-        bind(SecurityTokenService.class)
-                .toInstance(new SecurityTokenServiceImpl(MINUTES.toMillis(10), MINUTES.toMillis(20), TEST_SALT, 5));
-
-        bind(UserService.class).toInstance(new MockUserService());
-
-        bind(RoleConverter.class).toInstance(new AbstractRoleConverter() {
+        AbstractRoleConverter roleConverter = new AbstractRoleConverter() {
             @Override protected Map<String, Class<? extends SecurityRole>> allRoles() {
                 return new HashMap<>();
             }
-        });
+        };
+        bind(SecurityTokenService.class)
+                .toInstance(new SecurityTokenServiceImpl(
+                        JWS_KEY,
+                        MINUTES.toMillis(10),
+                        roleConverter));
+
+        bind(UserService.class).toInstance(new MockUserService());
+        bind(RoleConverter.class).toInstance(roleConverter);
     }
 }
