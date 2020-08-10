@@ -18,8 +18,7 @@ public class SecurityScope implements Scope, AutoCloseable {
     private final ThreadLocal<Map<Key<?>, Object>> values = new ThreadLocal<>();
 
     public SecurityScope() {
-        System.err.println("EEE NEW   " + this.hashCode());
-
+//        System.err.println("EEE NEW   " + this.hashCode());
     }
 
     @Override public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
@@ -37,7 +36,7 @@ public class SecurityScope implements Scope, AutoCloseable {
     }
 
     public SecurityScope enter() {
-        System.err.println("EEE ENTER " + this.hashCode());
+//        System.err.println("EEE ENTER " + this.hashCode());
         if (inScope()) {
             throw new IllegalStateException("already in a security-scope block");
         }
@@ -50,8 +49,7 @@ public class SecurityScope implements Scope, AutoCloseable {
     }
 
     public void exit() {
-        System.err.println("EEE EXIT  " + this.hashCode());
-
+//        System.err.println("EEE EXIT  " + this.hashCode());
         if (!inScope()) {
             throw new IllegalStateException("outside of a security-scope block");
         }
